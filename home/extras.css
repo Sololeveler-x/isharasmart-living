@@ -1,0 +1,89 @@
+/* RiVa demo extras: live camera PiP, now-playing chip, movie-night TV flicker, motion alerts */
+.rx-pip{position:absolute;left:14px;top:14px;width:clamp(120px,24%,190px);aspect-ratio:16/10;border-radius:12px;overflow:hidden;
+  background-repeat:no-repeat;background-size:300% auto;background-position:64.4% 74.7%;box-shadow:0 8px 24px rgba(0,0,0,.35);
+  border:2px solid rgba(255,255,255,.85);opacity:0;transform:translateY(-6px) scale(.96);transition:opacity .4s,transform .4s,border-color .3s;pointer-events:none;z-index:5}
+.riva-ph-house.cam-on .rx-pip{opacity:1;transform:none}
+.rx-pip.ir{filter:grayscale(1) contrast(1.35) brightness(1.6) sepia(.25) hue-rotate(60deg)}
+.rx-pip:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.08) 0 1px,transparent 1px 3px);pointer-events:none}
+.rx-pip b{position:absolute;left:8px;top:6px;font:700 10px/1 Inter,system-ui;color:#fff;letter-spacing:.08em;text-shadow:0 1px 2px #000;display:flex;align-items:center;gap:5px}
+.rx-pip b:before{content:"";width:7px;height:7px;border-radius:50%;background:#ff3b3b;animation:rxBlink 1s steps(2) infinite}
+.rx-pip i{position:absolute;right:8px;bottom:6px;font:600 9px/1 ui-monospace,Menlo,monospace;color:#fff;font-style:normal;text-shadow:0 1px 2px #000}
+.rx-pip u{position:absolute;left:8px;bottom:6px;font:700 9px/1 Inter,system-ui;color:#fff;text-decoration:none;background:#e5484d;padding:3px 6px;border-radius:4px;opacity:0;transition:opacity .2s}
+.rx-pip.alert{border-color:#ff4d4f}.rx-pip.alert u{opacity:1}
+.rx-np{position:absolute;right:14px;top:52px;display:flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;background:rgba(15,15,14,.62);
+  backdrop-filter:blur(8px);color:#fff;font:600 11px/1 Inter,system-ui;opacity:0;transform:translateY(-6px);transition:opacity .4s,transform .4s;pointer-events:none;z-index:5}
+.riva-ph-house.spk-on .rx-np{opacity:1;transform:none}
+.rx-np span{display:flex;gap:2px;align-items:flex-end;height:12px}
+.rx-np span em{width:3px;background:#7ee0a1;border-radius:1px;animation:rxEq 1s ease-in-out infinite}
+.rx-np span em:nth-child(2){animation-delay:.2s}.rx-np span em:nth-child(3){animation-delay:.45s}.rx-np span em:nth-child(4){animation-delay:.1s}
+.rx-tv{opacity:0;transition:opacity .8s;mix-blend-mode:screen}
+.riva-ph-house.rx-movie .rx-tv{opacity:1;animation:rxFlicker 2.6s infinite}
+.rx-porch{opacity:0;transition:opacity .25s;mix-blend-mode:screen}
+.riva-ph-house.rx-motion .rx-porch{opacity:calc(.35 + .65 * var(--night))}
+.riva-ph-house.rx-motion .sense{opacity:1!important;stroke:#ff8a7a}
+@keyframes rxBlink{50%{opacity:0}}
+@keyframes rxEq{0%,100%{height:3px}50%{height:12px}}
+@keyframes rxFlicker{0%{opacity:.55}8%{opacity:.9}15%{opacity:.6}31%{opacity:1}38%{opacity:.7}52%{opacity:.95}64%{opacity:.5}77%{opacity:.85}100%{opacity:.6}}
+@media (prefers-reduced-motion:reduce){.rx-pip b:before,.rx-np span em,.riva-ph-house.rx-movie .rx-tv{animation:none}}
+
+/* boundary wall + sliding gate (SVG, photo pixel space) */
+.rx-solid{filter:brightness(calc(1 - .62 * var(--night)))}
+.rx-leafL,.rx-leafR{transform-box:view-box;transition:transform 4.2s cubic-bezier(.45,.05,.3,1)}
+.rx-leafL{transform-origin:736px 880px}.rx-leafR{transform-origin:1264px 880px}
+.riva-ph-house.rx-gate-open .rx-leafL,.riva-ph-house.rx-gate-open .rx-leafR{transform:scaleX(.12)}
+.rx-lampglow{opacity:calc(.15 + .85 * var(--night));transition:opacity .9s}
+.rx-lamp{fill:#f6efe2;transition:fill .9s}
+.riva-ph-section[style*="--night: 1"] .rx-lamp{fill:#ffe7a8}
+.rx-led{fill:#3fbf6a;transition:fill .3s}
+.riva-ph-house.rx-gate-moving .rx-led{fill:#ffb020;animation:rxBlink .5s steps(2) infinite}
+.riva-ph-house.rx-gate-open .rx-led{fill:#ff4d4f}
+
+/* small screens: compact camera window, one scrolling row of phrases */
+.rx-pip b{white-space:nowrap}
+@media (max-width:640px){
+  .rx-pip{width:34%;left:10px;top:10px;border-width:1.5px;border-radius:9px}
+  .rx-pip b{font-size:8px;left:6px;top:5px}.rx-pip b span{display:none}
+  .rx-pip i{font-size:8px}
+  .rx-np{top:auto;bottom:58px;right:10px}
+  .riva-ph-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .riva-ph-chips::-webkit-scrollbar{display:none}
+  .riva-ph-chips button{flex:none}
+  .riva-ph-stage,.riva-ph-voice,.riva-ph-voice-body,.riva-ph-chips{min-width:0;max-width:100%}
+}
+
+/* slow walk-in: whole photo pushes toward the door, the boundary (nearest) grows faster and passes out of frame */
+.riva-ph-house .riva-ph-poster,.riva-ph-house .riva-ph-day,.riva-ph-house .riva-ph-night,.riva-ph-house .riva-ph-overlay{
+  transform-origin:59.6% 66%;transition:transform 5.5s cubic-bezier(.42,0,.2,1),opacity .9s ease}
+.riva-ph-house.rx-walk .riva-ph-poster,.riva-ph-house.rx-walk .riva-ph-day,.riva-ph-house.rx-walk .riva-ph-night,.riva-ph-house.rx-walk .riva-ph-overlay{transform:scale(1.6)}
+.rx-boundary{transform-box:view-box;transform-origin:1000px 1024px;transition:transform 5.5s cubic-bezier(.42,0,.2,1),opacity 2.8s ease 1.4s}
+.riva-ph-house.rx-walk .rx-boundary{transform:scale(1.9) translateY(150px);opacity:0}
+.riva-ph-house:not(.rx-walk) .rx-boundary{transition:transform 5.5s cubic-bezier(.42,0,.2,1),opacity 1.6s ease}
+@media (prefers-reduced-motion:reduce){.riva-ph-house .riva-ph-poster,.riva-ph-house .riva-ph-day,.riva-ph-house .riva-ph-night,.riva-ph-house .riva-ph-overlay,.rx-boundary{transition-duration:.01s}}
+
+/* control bar under the photo: status + walk in / walk out (keeps the gate and fence uncovered) */
+.rx-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:-4px}
+.rx-bar .riva-ph-status{position:static;flex:1 1 220px;min-width:0;background:#16160f;border-color:transparent;letter-spacing:.02em;font-size:12.5px}
+@media (min-width:641px){.rx-bar .riva-ph-status span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+.rx-walk-seg{display:inline-flex;padding:4px;border-radius:999px;background:#efece6;border:1px solid rgb(25 25 22 / .08);flex:none}
+.rx-walk-seg button{border:0;background:transparent;padding:9px 15px;border-radius:999px;font:600 12.5px/1 Inter,system-ui;color:#16160f;cursor:pointer;transition:background .2s,color .2s,opacity .2s}
+.rx-walk-seg button:not(:disabled):hover{background:#fff}
+.rx-walk-seg button:not(:disabled){background:#fff;box-shadow:0 1px 3px rgb(0 0 0 / .12)}
+.rx-walk-seg button:disabled{opacity:.4;cursor:default;background:transparent;box-shadow:none}
+
+@media (max-width:640px){
+  .rx-bar{gap:8px}
+  .rx-bar .riva-ph-status{flex-basis:100%;font-size:11.5px;padding:9px 13px;line-height:1.35;border-radius:18px}
+  .rx-walk-seg{width:100%}.rx-walk-seg button{flex:1;padding:10px 8px}
+  .riva-ph-foot{padding-right:56px}
+  .elementor-widget-social-icons.elementor-fixed{transform:scale(.8);transform-origin:100% 100%}
+}
+
+/* header: the right column wraps its menu toggle into an off-screen second column on phones/tablets */
+@media (max-width:1024px){.elementor-element-aad36e5{flex-wrap:nowrap!important;align-items:flex-end!important;justify-content:center!important}}
+
+/* panel rows (all widths): name + switch on one line, room chips on their own line underneath */
+.riva-ph-row{flex-wrap:wrap;row-gap:8px}
+.riva-ph-row:has(.riva-ph-groups) .riva-ph-meta{flex:1 1 0}
+.riva-ph-meta b,.riva-ph-meta span{white-space:nowrap}
+.riva-ph-groups{order:3;flex:1 1 100%;justify-content:flex-start;padding-left:51px}
+@media (max-width:640px){.riva-ph-groups button{font-size:11px;padding:5px 9px!important}}

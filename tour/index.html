@@ -1,0 +1,3549 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+<link rel="icon" type="image/png" href="./ishara-logo-trans.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ishara Smart Living – Walkable 3D Matter Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+  <style>
+    :root {
+      --blue: #046BD2;
+      --blue2: #3B9CF0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background: #0b1524;
+      font-family: Inter, system-ui, sans-serif;
+      color: #fff;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    #app:focus {
+      outline: none;
+    }
+
+    #app canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #cross {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 7px;
+      height: 7px;
+      margin: -3.5px 0 0 -3.5px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .85);
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, .25);
+      opacity: 0;
+      transition: opacity .3s, transform .15s;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    #app.playing #cross {
+      opacity: 1;
+    }
+
+    #top {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      z-index: 6;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity .5s;
+      pointer-events: none;
+    }
+
+    #app.playing #top {
+      opacity: .92;
+    }
+
+    #top .logo {
+      height: 28px;
+      width: auto;
+      display: block;
+    }
+
+    #top .tag {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: #cfe0f5;
+      border: 1px solid rgba(255, 255, 255, .28);
+      padding: 3px 7px;
+      border-radius: 999px;
+    }
+
+    #hint {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 6;
+      display: flex;
+      gap: 13px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 12.5px;
+      color: #d7e5f7;
+      background: rgba(6, 16, 30, .5);
+      backdrop-filter: blur(6px);
+      padding: 8px 15px;
+      border-radius: 11px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      opacity: 0;
+      transition: opacity .5s;
+      pointer-events: none;
+    }
+
+    #app.playing #hint {
+      opacity: 1;
+    }
+
+    #hint kbd {
+      font-weight: 600;
+      color: #fff;
+      background: rgba(255, 255, 255, .14);
+      border: 1px solid rgba(255, 255, 255, .22);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 1px 7px;
+    }
+
+    @media (hover:none) and (pointer:coarse) {
+      #hint {
+        display: none;
+      }
+    }
+
+    #toast {
+      position: absolute;
+      left: 50%;
+      top: 66px;
+      transform: translateX(-50%);
+      z-index: 7;
+      font-size: 15.5px;
+      font-weight: 600;
+      background: rgba(4, 107, 210, .92);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 13px;
+      max-width: calc(100vw - 32px);
+      text-align: center;
+      opacity: 0;
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+    }
+
+    #toast.on {
+      opacity: 1;
+      transform: translateX(-50%) translateY(3px);
+    }
+
+    #mic {
+      position: absolute; right: 16px; bottom: 16px; z-index: 8; width: 54px; height: 54px;
+      display: none; align-items: center; justify-content: center; padding: 0; cursor: pointer;
+      color: #cfe0f5; background: rgba(9, 18, 32, .82); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, .22); border-radius: 50%;
+      box-shadow: 0 12px 26px -10px rgba(0, 0, 0, .6); transition: transform .18s, background .18s, color .18s;
+    }
+    #app.playing #mic { display: flex; }
+    #mic svg { width: 22px; height: 22px; }
+    #mic:hover { transform: translateY(-2px); }
+    #mic.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+    #mic.on::after {
+      content: ""; position: absolute; inset: -6px; border-radius: 50%;
+      border: 2px solid rgba(59, 156, 240, .55); animation: micPulse 1.4s ease-out infinite;
+    }
+    @keyframes micPulse { 0% { transform: scale(.9); opacity: .9 } 100% { transform: scale(1.25); opacity: 0 } }
+    #voice {
+      position: absolute; right: 16px; bottom: 80px; z-index: 8; max-width: min(340px, calc(100vw - 32px));
+      display: none; flex-direction: column; gap: 3px; padding: 11px 14px; border-radius: 13px;
+      font-size: 13px; color: #eaf1fb; background: rgba(6, 16, 30, .88); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, .16); pointer-events: none;
+    }
+    #voice.on { display: flex; }
+    #voice b { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: #7cc0ff; }
+    #voice span { line-height: 1.45; }
+    #voice span.dim { color: #8fa6bd; }
+
+    #panel-btn {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      z-index: 8;
+      cursor: pointer;
+      width: 66px;
+      height: 66px;
+      padding: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .3);
+      background: #0b1524;
+      box-shadow: 0 12px 26px -10px rgba(0, 0, 0, .6);
+      transition: transform .18s;
+    }
+
+    #panel-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    #panel-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 11px;
+      display: block;
+    }
+
+    #panel {
+      position: absolute;
+      right: 16px;
+      bottom: 70px;
+      z-index: 9;
+      width: 290px;
+      max-width: calc(100vw - 32px);
+      background: rgba(9, 18, 32, .92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(90, 150, 220, .35);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .7);
+      opacity: 0;
+      transform: translateY(12px) scale(.97);
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      max-height: calc(100vh - 86px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+    }
+
+    #panel.on {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    #panel .phead,
+    #panel2 .phead,
+    #panel3 .phead {
+      display: block;
+      height: 24px;
+      width: auto;
+      max-width: 62%;
+      object-fit: contain;
+      margin: 0 0 14px;
+    }
+
+    /* the bedroom's panel is square, and carries only its own light and curtains */
+    #panel2 {
+      position: absolute;
+      right: 16px;
+      bottom: 70px;
+      z-index: 9;
+      width: 262px;
+      height: 262px;
+      max-width: calc(100vw - 32px);
+      display: flex;
+      flex-direction: column;
+      background: rgba(9, 18, 32, .92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(90, 150, 220, .35);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .7);
+      opacity: 0;
+      transform: translateY(12px) scale(.97);
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      max-height: calc(100vh - 86px);
+      touch-action: pan-y;
+    }
+
+    #panel2.on {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    #panel3 {
+      position: absolute;
+      right: 16px;
+      bottom: 70px;
+      z-index: 9;
+      width: 262px;
+      max-width: calc(100vw - 32px);
+      display: flex;
+      flex-direction: column;
+      background: rgba(9, 18, 32, .92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(90, 150, 220, .35);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .7);
+      opacity: 0;
+      transform: translateY(12px) scale(.97);
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      max-height: calc(100vh - 86px);
+      touch-action: pan-y;
+    }
+
+    #panel3.on {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    #panel .ro,
+    #panel2 .ro,
+    #panel3 .ro {
+      font-size: 13px;
+      font-weight: 600;
+      color: #7f97b4;
+    }
+
+    #panel .ro.live {
+      color: #7cc0ff;
+    }
+
+    #panel .total {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding: 11px 13px;
+      border-radius: 11px;
+      background: rgba(59, 156, 240, .14);
+      border: 1px solid rgba(59, 156, 240, .3);
+    }
+
+    #panel .total b {
+      font-size: 13px;
+      font-weight: 600;
+      color: #cfe0f5;
+    }
+
+    #panel .total span {
+      font-family: Poppins, sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      color: #eaf1fb;
+    }
+
+    #panel2 .rm,
+    #panel3 .rm {
+      font-family: Poppins, sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      color: #eaf1fb;
+    }
+
+    #panel2 .rm small,
+    #panel3 .rm small {
+      display: block;
+      font-family: Inter, sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: #7f97b4;
+      margin-top: 4px;
+    }
+
+    #panel2 .rows,
+    #panel3 .rows {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #panel .scenes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0 0 12px;
+    }
+
+    #panel .scene {
+      flex: 1 1 auto;
+      font: inherit;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #cfe0f5;
+      cursor: pointer;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 9px;
+      padding: 7px 9px;
+      transition: background .18s, color .18s, border-color .18s;
+      white-space: nowrap;
+    }
+
+    #panel .scene:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    #panel .scene.active {
+      background: rgba(59, 156, 240, .22);
+      border-color: rgba(59, 156, 240, .6);
+      color: #fff;
+    }
+
+    #panel .tests {
+      display: flex;
+      gap: 6px;
+      margin: 0 0 12px;
+    }
+
+    #panel .test {
+      flex: 1;
+      font: inherit;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #e9a7a7;
+      cursor: pointer;
+      background: rgba(224, 85, 85, .10);
+      border: 1px solid rgba(224, 85, 85, .32);
+      border-radius: 9px;
+      padding: 7px 9px;
+      transition: background .18s, color .18s;
+    }
+
+    #panel .test:hover {
+      background: rgba(224, 85, 85, .85);
+      color: #fff;
+    }
+
+    #alarm-flash {
+      position: absolute;
+      inset: 0;
+      z-index: 11;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(120% 120% at 50% 50%, rgba(224, 85, 85, 0) 45%, rgba(224, 85, 85, .55) 100%);
+    }
+
+    #alarm-flash.on {
+      animation: alarmPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes alarmPulse {
+
+      0%,
+      100% {
+        opacity: .25
+      }
+
+      50% {
+        opacity: .85
+      }
+    }
+
+    #alarm-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 12;
+      display: none;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 18px;
+      background: rgba(150, 26, 26, .94);
+      color: #fff;
+      font-size: 14px;
+      box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .8);
+    }
+
+    #alarm-bar b {
+      display: block;
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      opacity: .85;
+      margin-bottom: 2px;
+    }
+
+    #alarm-clear {
+      flex: none;
+      margin-left: auto;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      color: #8b1a1a;
+      cursor: pointer;
+      background: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+    }
+
+    #panel .view {
+      display: none;
+    }
+
+    #panel[data-view="main"] .view-main,
+    #panel[data-view="bedroom"] .view-bedroom,
+    #panel[data-view="bathroom"] .view-bathroom,
+    #panel[data-view="energy"] .view-energy,
+    #panel[data-view="add"] .view-add,
+    #panel[data-view="auto"] .view-auto,
+    #panel[data-view="strip"] .view-strip,
+    #panel[data-view="lights"] .view-lights {
+      display: block;
+    }
+
+    /* dimmer + colour temperature */
+    #panel .dimrow { display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0 6px; font-size: 13px; color: #9db4d0; border-top: 1px solid rgba(255,255,255,.08); }
+    #panel .dimrow b { font-size: 13px; font-weight: 600; color: #eaf1fb; }
+    #panel input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
+      border-radius: 999px; background: linear-gradient(90deg, #1d2a3b, var(--blue2)); outline: none; }
+    #panel input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px;
+      border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+    #panel .view-lights .swatches { grid-template-columns: repeat(6, 1fr); }
+    #panel .view-lights .swatches button { height: 30px; }
+
+    /* cove strip colours */
+    .swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px 0; }
+    .swatches button { height: 34px; border-radius: 9px; cursor: pointer; border: 2px solid transparent;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); transition: transform .15s, border-color .15s; }
+    .swatches button:hover { transform: translateY(-2px); }
+    .swatches button.sel { border-color: #eaf1fb; }
+
+    /* automation rules */
+    #auto-rows .rule { padding: 12px 0; border-top: 1px solid rgba(255, 255, 255, .08); }
+    #auto-rows .rh { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    #auto-rows .rn { font-size: 14px; font-weight: 600; color: #eaf1fb; }
+    #auto-rows .rule.off .rn { color: #7f97b4; }
+    #auto-rows .rw { font-size: 12px; line-height: 1.45; color: #9db4d0; margin-top: 5px; }
+    #auto-rows .rw b { color: #7cc0ff; font-weight: 600; }
+    #auto-rows .rule.off .rw { color: #61758c; }
+    #auto-rows .rule.off .rw b { color: #61758c; }
+    #auto-rows .rl { font-size: 11px; color: #61758c; margin-top: 6px; }
+    #auto-rows .rl.hot { color: #7cc0ff; }
+
+    /* commissioning wizard */
+    #add-body { font-size: 13px; color: #cfe0f5; }
+    #add-body p { margin: 2px 0 12px; line-height: 1.5; color: #9db4d0; }
+    #add-body .qr { display: block; margin: 0 auto 10px; border-radius: 10px; background: #fff; padding: 8px; }
+    #add-body .code { text-align: center; font-family: Poppins, sans-serif; font-size: 18px; font-weight: 700;
+      letter-spacing: .06em; color: #eaf1fb; margin: 0 0 4px; }
+    #add-body .codelabel { text-align: center; font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+      color: #7f97b4; margin: 0 0 12px; }
+    #add-body .go { width: 100%; font: inherit; font-size: 13.5px; font-weight: 600; color: #fff; cursor: pointer;
+      background: var(--blue); border: none; border-radius: 10px; padding: 11px; transition: transform .15s; }
+    #add-body .go:hover { transform: translateY(-1px); }
+    #add-body .go.ghost { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16); color: #cfe0f5; }
+    #add-body .step { display: flex; align-items: center; gap: 9px; padding: 7px 0; color: #61758c; }
+    #add-body .step.on { color: #cfe0f5; }
+    #add-body .step.done { color: #7cc0ff; }
+    #add-body .step i { width: 16px; height: 16px; flex: none; border-radius: 50%; font-style: normal;
+      border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+    #add-body .ok { text-align: center; padding: 6px 0 12px; }
+    #add-body .ok b { display: block; font-family: Poppins, sans-serif; font-size: 16px; color: #eaf1fb; margin-bottom: 3px; }
+
+    #panel .back {
+      display: block;
+      width: 100%;
+      font: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #cfe0f5;
+      cursor: pointer;
+      text-align: left;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 9px;
+      padding: 9px 12px;
+      margin: 0 0 4px;
+      transition: background .18s;
+    }
+
+    #panel .back:hover {
+      background: rgba(255, 255, 255, .13);
+    }
+
+    #panel .grp .nm {
+      flex: 1;
+      cursor: pointer;
+      transition: color .18s;
+    }
+
+    #panel .grp .nm:hover {
+      color: #7cc0ff;
+    }
+
+    #panel .chev {
+      width: 15px;
+      height: 15px;
+      opacity: .5;
+      margin-left: auto;
+      padding-right: 10px;
+      box-sizing: content-box;
+    }
+
+    #panel .ctl,
+    #panel2 .ctl,
+    #panel3 .ctl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-top: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    #panel2 .ctl,
+    #panel3 .ctl {
+      padding: 15px 0;
+    }
+
+    #panel .nm,
+    #panel2 .nm,
+    #panel3 .nm {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    #panel .nm svg,
+    #panel2 .nm svg,
+    #panel3 .nm svg {
+      width: 18px;
+      height: 18px;
+      color: #9db4d0;
+    }
+
+    .sw {
+      width: 46px;
+      height: 26px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .16);
+      position: relative;
+      cursor: pointer;
+      transition: background .2s;
+      flex: none;
+    }
+
+    .sw::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform .22s;
+    }
+
+    .sw.on {
+      background: var(--blue);
+    }
+
+    .sw.on::after {
+      transform: translateX(20px);
+    }
+
+    .sw.lock.on {
+      background: #c83c3c;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: none;
+    }
+
+    .stepper button {
+      width: 26px;
+      height: 26px;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      color: #cfe0f5;
+      cursor: pointer;
+      background: rgba(255, 255, 255, .1);
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 8px;
+    }
+
+    .stepper button:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .stepper span {
+      min-width: 52px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    #gate {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      background: radial-gradient(125% 125% at 50% 30%, #faf6ef, #e9dfce 78%);
+      transition: opacity .6s;
+    }
+
+    #gate.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #gate h1 {
+      font-family: Poppins, sans-serif;
+      font-weight: 700;
+      font-size: clamp(28px, 6vw, 50px);
+      margin: 0 0 8px;
+      background: linear-gradient(100deg, #243244, #046BD2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    #gate p {
+      color: #6d6456;
+      font-size: 14px;
+      max-width: 440px;
+      margin: 0 0 20px;
+      line-height: 1.6;
+    }
+
+    #bar {
+      width: min(300px, 66vw);
+      height: 3px;
+      background: rgba(36, 50, 68, .12);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    #bar i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--blue), var(--blue2));
+      transition: width .3s;
+    }
+
+    #load-label {
+      font-size: 11px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: #9a8d76;
+      margin-bottom: 20px;
+    }
+
+    #controls {
+      display: none;
+      color: #6d6456;
+      font-size: 13.5px;
+      line-height: 2;
+      margin-bottom: 20px;
+    }
+
+    #controls kbd {
+      font-weight: 600;
+      color: #26303f;
+      background: #fff;
+      border: 1px solid rgba(36, 50, 68, .18);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 1px 8px;
+      box-shadow: 0 1px 0 rgba(36, 50, 68, .12);
+    }
+
+    #enter {
+      display: none;
+      font: inherit;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      color: #fff;
+      background: var(--blue);
+      border: none;
+      padding: 15px 32px;
+      border-radius: 13px;
+      box-shadow: 0 14px 30px -12px rgba(4, 107, 210, .9);
+      transition: transform .18s;
+    }
+
+    #enter:hover {
+      transform: translateY(-2px);
+    }
+
+    #tour-btn {
+      display: none;
+      margin-top: 12px;
+      font: inherit;
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+      color: #243244;
+      background: transparent;
+      border: 1px solid rgba(36, 50, 68, .28);
+      padding: 10px 20px;
+      border-radius: 11px;
+      transition: background .18s, border-color .18s;
+    }
+
+    #tour-btn:hover {
+      background: rgba(36, 50, 68, .07);
+      border-color: rgba(36, 50, 68, .45);
+    }
+
+    #tour-cap {
+      position: absolute;
+      left: 50%;
+      bottom: 58px;
+      transform: translateX(-50%);
+      z-index: 9;
+      max-width: min(620px, 86vw);
+      display: none;
+      align-items: center;
+      gap: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #eaf1fb;
+      background: rgba(6, 16, 30, .82);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, .16);
+      padding: 13px 16px;
+      border-radius: 13px;
+    }
+
+    #tour-cap b {
+      display: block;
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: #7cc0ff;
+      margin-bottom: 3px;
+    }
+
+    #tour-skip {
+      flex: none;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: #cfe0f5;
+      cursor: pointer;
+      background: rgba(255, 255, 255, .1);
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 8px;
+      padding: 7px 11px;
+    }
+
+    #gate .foot {
+      position: absolute;
+      bottom: 14px;
+      font-size: 11px;
+      color: #9a9284;
+      max-width: 640px;
+      padding: 0 20px;
+    }
+
+    #credit {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      z-index: 6;
+      font-size: 10.5px;
+      color: rgba(255, 255, 255, .5);
+      opacity: 0;
+      transition: opacity .5s;
+    }
+
+    #app.playing #credit {
+      opacity: 1;
+    }
+
+    #stick {
+      position: absolute;
+      left: 24px;
+      bottom: 24px;
+      width: 116px;
+      height: 116px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .18);
+      z-index: 6;
+      display: none;
+    }
+
+    #app.playing.touch #stick {
+      display: block;
+    }
+
+    #stick i {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 50px;
+      height: 50px;
+      margin: -25px 0 0 -25px;
+      border-radius: 50%;
+      background: rgba(4, 107, 210, .7);
+      border: 1px solid rgba(255, 255, 255, .4);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app" tabindex="-1">
+    <div id="cross"></div>
+    <div id="top">
+      <a href="../home/index.html" style="pointer-events:auto; display:inline-flex; align-items:center; gap:6px; color:#ffffff; background:rgba(11,15,23,0.85); border:1px solid rgba(207,168,86,0.6); padding:6px 14px; border-radius:20px; text-decoration:none; font-weight:600; font-size:12px; backdrop-filter:blur(8px); margin-right:8px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">← Return to Main Site</a>
+      <span style="font-family:Poppins,sans-serif; font-weight:800; font-size:15px; letter-spacing:0.06em; color:#ffffff;">ISHARA <span style="color:#cfa856">SMART LIVING</span></span>
+      <span class="tag">Live 3D</span>
+    </div>
+    <div id="credit">3D apartment: “Confortable appartment” by SofianeLasri (CC-BY)</div>
+    <div id="hint"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk</span><span><kbd>Drag</kbd>
+        look</span><span><kbd>Double-click</kbd> door / curtain / TV / floor</span></div>
+    <div id="toast"></div>
+    <div id="stick"><i></i></div>
+
+    <div id="voice"><b id="voice-state">Listening…</b><span id="voice-said"></span></div>
+    <button id="mic" aria-label="Voice control" title="Voice control (V)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="9" y="2" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v4M9 22h6" />
+      </svg>
+    </button>
+
+    <button id="panel-btn" aria-label="Open smart panel"><img src="./ishara-logo-trans.png"
+        alt="Ishara Smart Living"></button>
+    <div id="panel" data-view="main">
+      <img class="phead" src="./ishara-logo-trans.png" alt="Ishara Smart Living">
+
+      <div class="view view-main">
+        <div class="scenes">
+          <button class="scene" data-scene="morning">Good morning</button>
+          <button class="scene" data-scene="movie">Movie night</button>
+          <button class="scene" data-scene="away">Leaving home</button>
+        </div>
+        <div class="tests">
+          <button class="test" data-test="smoke">Test smoke</button>
+          <button class="test" data-test="leak">Test leak</button>
+        </div>
+        <div class="ctl grp" data-goto="lights"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z" />
+            </svg> All lights <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span>
+          <div class="sw on" id="sw-lights"></div>
+        </div>
+        <div class="ctl" id="row-floorlamp" hidden><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3h8l3 8H5l3-8ZM12 11v9M8 21h8"/></svg> Floor lamp</span><div class="sw" id="sw-floorlamp"></div></div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18M21 3v18M3 3h18M3 21h18M12 3v18"/><circle cx="9.6" cy="12" r=".9" fill="currentColor"/></svg> Balcony door</span><div class="sw lock on" id="sw-slider"></div></div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 4h10l2 6H5l2-6ZM12 10v3M9 13h6l-1 7h-4l-1-7Z"/></svg> Balcony light</span><div class="sw" id="sw-balconylight"></div></div>
+        <div class="ctl grp" data-goto="strip"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7h18M5 7v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/><path d="M8 16v2M12 16v2M16 16v2"/></svg> Cove strip <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span><div class="sw" id="sw-strip"></div></div>
+        <div class="ctl grp" data-goto="auto"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"/></svg> Automations <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span><span class="ro" id="auto-count">—</span></div>
+        <div class="ctl grp" data-goto="add"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Add device <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></span><span class="ro" id="add-hint">Matter</span></div>
+        <div class="ctl grp" data-goto="energy"><span class="nm"><svg viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" />
+            </svg> Energy <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round">
+              <path d="m9 6 6 6-6 6" />
+            </svg></span><span class="ro live" id="energy-total">—</span></div>
+        <div class="ctl grp" data-room="bedroom" data-goto="bedroom"><span class="nm"><svg viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M3 18v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5M3 20v-2M21 20v-2M3 14h18M7 11V8h4v3" />
+            </svg> Bedroom <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round">
+              <path d="m9 6 6 6-6 6" />
+            </svg></span>
+          <div class="sw" id="sw-grp-bedroom"></div>
+        </div>
+        <div class="ctl grp" data-room="bathroom" data-goto="bathroom"><span class="nm"><svg viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M4 12h16v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-3ZM7 12V6a2 2 0 0 1 4 0M7 20l-1 2M17 20l1 2" />
+            </svg> Bathroom <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round">
+              <path d="m9 6 6 6-6 6" />
+            </svg></span>
+          <div class="sw" id="sw-grp-bathroom"></div>
+        </div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <rect x="5" y="11" width="14" height="10" rx="2" />
+              <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+            </svg> Front door</span>
+          <div class="sw lock on" id="sw-lock"></div>
+        </div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <rect x="2" y="4" width="20" height="13" rx="2" />
+              <path d="M8 21h8" />
+            </svg> TV</span>
+          <div class="sw" id="sw-tv"></div>
+        </div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M3 3h18M6 3v18M18 3v18M6 8c3 1 3 7 0 8M18 8c-3 1-3 7 0 8" />
+            </svg> Living room curtains</span>
+          <div class="sw on" id="sw-curtain"></div>
+        </div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="2" />
+              <circle cx="15.5" cy="15.5" r="2" />
+            </svg> Hob</span>
+          <div class="sw" id="sw-hob"></div>
+        </div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z" />
+            </svg> Climate</span>
+          <div class="stepper"><button class="temp-dn">−</button><span class="temp-val">21.0°</span><button
+              class="temp-up">+</button></div>
+        </div>
+      </div>
+
+      <div class="view view-bedroom">
+        <button class="back">← Bedroom</button>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z" />
+            </svg> Light</span>
+          <div class="sw" id="sw-bedlight"></div>
+        </div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M3 3h18M6 3v18M18 3v18M6 8c3 1 3 7 0 8M18 8c-3 1-3 7 0 8" />
+            </svg> Curtains</span>
+          <div class="sw on" id="sw-bedcurtain"></div>
+        </div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M4 21h16M6 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17" />
+              <circle cx="13" cy="12" r=".9" fill="currentColor" />
+            </svg> Door</span>
+          <div class="sw lock on" id="sw-bed"></div>
+        </div>
+      </div>
+
+      <div class="view view-lights">
+        <button class="back">← All lights</button>
+        <div class="ctl"><span class="nm">Lights</span><div class="sw on" id="sw-lights2"></div></div>
+        <div class="dimrow"><span>Brightness</span><b id="dim-val">100%</b></div>
+        <input id="dim" type="range" min="10" max="100" step="5" value="100">
+        <div class="dimrow"><span>Colour</span><b id="temp-name">Warm · 2700K</b></div>
+        <div class="swatches" id="temp-swatches"></div>
+      </div>
+
+      <div class="view view-strip">
+        <button class="back">← Cove strip</button>
+        <div class="ctl"><span class="nm">Strip</span><div class="sw" id="sw-strip2"></div></div>
+        <div class="swatches" id="strip-swatches"></div>
+        <div class="ctl"><span class="nm">Cycle colours</span><div class="sw" id="sw-stripcycle"></div></div>
+      </div>
+
+      <div class="view view-auto">
+        <button class="back">← Automations</button>
+        <div id="auto-rows"></div>
+      </div>
+
+      <div class="view view-add">
+        <button class="back">← Add device</button>
+        <div id="add-body"></div>
+      </div>
+
+      <div class="view view-energy">
+        <button class="back">← Energy</button>
+        <div id="energy-rows"></div>
+        <div class="total"><b>Right now</b><span id="energy-now">—</span></div>
+      </div>
+
+      <div class="view view-bathroom">
+        <button class="back">← Bathroom</button>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z" />
+            </svg> Light</span>
+          <div class="sw" id="sw-bathlight"></div>
+        </div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M4 21h16M6 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17" />
+              <circle cx="13" cy="12" r=".9" fill="currentColor" />
+            </svg> Door</span>
+          <div class="sw lock on" id="sw-bath"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel2">
+      <img class="phead" src="./ishara-logo-trans.png" alt="Ishara Smart Living">
+      <div class="rm">Bedroom<small>Room panel</small></div>
+      <div class="rows">
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z" />
+            </svg> Light</span>
+          <div class="sw" id="sw2-bedlight"></div>
+        </div>
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M3 3h18M6 3v18M18 3v18M6 8c3 1 3 7 0 8M18 8c-3 1-3 7 0 8" />
+            </svg> Curtains</span>
+          <div class="sw on" id="sw2-bedcurtain"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel3">
+      <img class="phead" src="./ishara-logo-trans.png" alt="Ishara Smart Living">
+      <div class="rm">Climate<small id="climate-mode">Idle</small></div>
+      <div class="rows">
+        <div class="ctl"><span class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z" />
+            </svg> Setpoint</span>
+          <div class="stepper"><button class="temp-dn">−</button><span class="temp-val">21.0°</span><button
+              class="temp-up">+</button></div>
+        </div>
+        <div class="ctl"><span class="nm">Room now</span><span class="ro" id="temp-now">19.4°</span></div>
+      </div>
+    </div>
+
+    <div id="gate">
+      <h1>Walk the Matter Home</h1>
+      <p>A real, walkable smart home. Lights, locks, blinds, climate and energy — plus presence, contact, leak and smoke
+        sensors, every one of them a live Matter endpoint. Walk in and run the house yourself, or take the tour and
+        watch it run itself.</p>
+      <div id="bar"><i></i></div>
+      <div id="load-label">Loading the home…</div>
+      <div id="controls">
+        <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk · <kbd>Drag</kbd> look · <kbd>Shift</kbd> run</div>
+        <div><b>Double-click</b> (or double-tap) a door, curtain or the TV to switch it · double-click the floor to walk there</div>
+        <div>Walk up to any panel or the thermostat and press <kbd>E</kbd></div>
+      </div>
+      <button id="enter">Enter the home →</button>
+      <button id="tour-btn">▶ Take the guided tour</button>
+      <div class="foot">Real 3D model loaded live in your browser. “Confortable appartment” by SofianeLasri, CC-BY.
+        Lighting, controls and interactions added by Ishara Smart Living.</div>
+    </div>
+  </div>
+
+  <script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/build/three.module.js",
+  "three/addons/": "./vendor/three/examples/jsm/"
+}}
+</script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    const app = document.getElementById('app');
+    const $ = id => document.getElementById(id);
+    const isTouch = matchMedia('(hover:none) and (pointer:coarse)').matches || 'ontouchstart' in window;
+    if (isTouch) app.classList.add('touch');
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    app.insertBefore(renderer.domElement, app.firstChild);
+    const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0c1626);
+    const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.05, 200); camera.rotation.order = 'YXZ';
+
+    // The model's lighting is BAKED into its textures, so we render it UNLIT (materials converted to
+    // MeshBasicMaterial on load). No scene lights — adding any would double-expose it to white.
+
+    // darkness veil for "lights off"
+    const veil = new THREE.Mesh(new THREE.SphereGeometry(60, 16, 12), new THREE.MeshBasicMaterial({ color: 0x05070f, transparent: true, opacity: 0, side: THREE.BackSide, depthTest: false }));
+    veil.renderOrder = 998; veil.material.depthWrite = false; scene.add(veil);
+    // The model's lighting is baked, so a warm bulb cannot actually relight anything. Multiplying
+    // the rendered room by the lamp's colour is the honest approximation: warm light pulls the
+    // greens and blues down, cool light pulls the reds down. It draws after the darkness veil but
+    // before the panels and the cove strip at 1000, so those keep their own colour.
+    const lightTint = new THREE.Mesh(new THREE.SphereGeometry(59, 16, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.BackSide, depthTest: false, depthWrite: false, blending: THREE.MultiplyBlending }));
+    lightTint.renderOrder = 999; scene.add(lightTint);
+
+    // Dimming and colour temperature for the house lights.
+    const LIGHT_TEMPS = [
+      ['Candle', 2200, 0xffc08a], ['Warm', 2700, 0xffd6b0], ['Soft', 3000, 0xffe4cb],
+      ['Neutral', 4000, 0xfff3ea], ['Cool', 5000, 0xf2f6ff], ['Daylight', 6500, 0xd8e6ff],
+    ];
+    let lightLevel = 1, lightTempIdx = 1, lightOnNow = 1;
+    const _tintTarget = new THREE.Color(), _white = new THREE.Color(0xffffff);
+    const _veilCol = new THREE.Color(), _night = new THREE.Color(0x05070f), _warmDark = new THREE.Color();
+
+    // ---- wall-mounted smart panel (S9E-11) ----
+    // TUNE THESE: walk to the wall, aim, press P, then paste the logged values here.
+    let PANEL_POS = new THREE.Vector3(1.969, 1.600, -1.613);
+    let PANEL_ROT_Y = -Math.PI / 2;
+    const PANEL_W = 0.34, PANEL_H = 0.22, PANEL_D = 0.03;
+    const wallPanel = new THREE.Group();
+    wallPanel.add(new THREE.Mesh(new THREE.BoxGeometry(PANEL_W, PANEL_H, PANEL_D), new THREE.MeshBasicMaterial({ color: 0x11161f })));
+    const panelScreen = new THREE.Mesh(new THREE.PlaneGeometry(PANEL_W * 0.92, PANEL_H * 0.86), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    panelScreen.position.z = PANEL_D / 2 + 0.0015; wallPanel.add(panelScreen);
+    // draw the screen after the darkness veil so an always-on display stays readable with lights off
+    panelScreen.material.transparent = true; panelScreen.renderOrder = 1000;
+    // glowing locator dot so the panel is findable across the room
+    const panelGlow = new THREE.Mesh(new THREE.RingGeometry(0.011, 0.019, 24), new THREE.MeshBasicMaterial({ color: 0x3B9CF0, transparent: true, opacity: .9, side: THREE.DoubleSide, depthTest: false }));
+    panelGlow.position.set(PANEL_W / 2 - 0.032, -PANEL_H / 2 + 0.030, PANEL_D / 2 + 0.005); panelGlow.renderOrder = 1000; wallPanel.add(panelGlow);
+    scene.add(wallPanel);
+    function applyPanelTransform() { wallPanel.position.copy(PANEL_POS); wallPanel.rotation.set(0, PANEL_ROT_Y, 0); }
+    applyPanelTransform();
+
+    // ---- bedroom's square wall panel ----
+    // Mounted on the bedroom face of the door wall, which raycasts at z=-1.483. The door opening
+    // ends at x=3.130 and the model's own switch plate at x=3.573, so x=4.05 is clear plaster.
+    // Square (0.22 x 0.22) where the hall's is a 0.34 x 0.22 landscape unit.
+    const BEDP_POS = new THREE.Vector3(4.05, 1.45, -1.499), BEDP_ROT_Y = Math.PI;
+    const BEDP_S = 0.22, BEDP_D = 0.03;
+    const bedPanel = new THREE.Group();
+    bedPanel.add(new THREE.Mesh(new THREE.BoxGeometry(BEDP_S, BEDP_S, BEDP_D), new THREE.MeshBasicMaterial({ color: 0x11161f })));
+    const bedScreen = new THREE.Mesh(new THREE.PlaneGeometry(BEDP_S * 0.90, BEDP_S * 0.90), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    bedScreen.position.z = BEDP_D / 2 + 0.0015; bedPanel.add(bedScreen);
+    bedScreen.material.transparent = true; bedScreen.renderOrder = 1000;   // stays lit through the room veil
+    const bedGlow = new THREE.Mesh(new THREE.RingGeometry(0.009, 0.016, 24), new THREE.MeshBasicMaterial({ color: 0x3B9CF0, transparent: true, opacity: .9, side: THREE.DoubleSide, depthTest: false }));
+    bedGlow.position.set(BEDP_S / 2 - 0.028, -BEDP_S / 2 + 0.026, BEDP_D / 2 + 0.005); bedGlow.renderOrder = 1000; bedPanel.add(bedGlow);
+    bedPanel.position.copy(BEDP_POS); bedPanel.rotation.set(0, BEDP_ROT_Y, 0);
+    scene.add(bedPanel);
+
+    // ---- front door: tunable hinge rig (press K aiming at the door to measure) ----
+    let DOOR_CENTER = new THREE.Vector3(1.195, 0.924, -3.895); // measured with the K picker (3 meshes)
+    let HINGE_SIDE = 'end';                      // 'start' | 'end' — hinge opposite the model's handle
+    let OPEN_ANGLE = Math.PI * 0.5 * 0.9;        // swing amount (radians)
+    let SWING_SIGN = 1;                          // +1 swings the free edge into the room from this hinge
+    let DOOR_GROUP_RADIUS = 0.35;                  // gather every mesh within this of the door centre
+    let doorParts = [], doorPivot = null, doorTarget = 0, doorNow = 0;
+    // Built leaves for the two openings the model has no door for.
+    // Measured off the model: each opening's jamb, width and lintel were found by raycasting
+    // the loaded geometry. pos = hinge jamb (on the floor); rotY orients the leaf into its wall.
+    //   bedroom  — wall z=-1.341 facing +Z, opening x  2.275..3.130, lintel 2.065
+    //              (the room behind it holds the model's bedroom_props_mat geometry)
+    //   bathroom — wall x=3.30  facing -X, opening z -1.125..-0.275, lintel 2.065
+    const EXTRA_DOORS = [
+      {
+        id: 'bedroom', swId: 'sw-bed', label: 'Bedroom door', width: 0.855, height: 2.05, thickness: 0.04,
+        pos: new THREE.Vector3(2.275, 0, -1.341), rotY: 0, hinge: 'start', sign: 1, pivot: null, target: 0, now: 0
+      },
+      {
+        id: 'bathroom', swId: 'sw-bath', label: 'Bathroom door', width: 0.85, height: 2.05, thickness: 0.04,
+        pos: new THREE.Vector3(3.300, 0, -1.125), rotY: -Math.PI / 2, hinge: 'start', sign: 1, pivot: null, target: 0, now: 0
+      },
+    ];
+
+    const player = { x: 0, y: 1.6, z: 0, yaw: 0, pitch: 0, r: 0.32 };
+    let world = null, ready = false;
+
+    // The bar used to be a timer creeping to 92% and waiting there, which on a slow link tells the
+    // visitor nothing for several seconds. Drive it from real bytes when the server reports a length,
+    // and keep the creep only as a fallback for gzip/chunked responses that report none.
+    let pg = 0, realPg = false;
+    const setBar = v => { const b = document.querySelector('#bar i'); if (b) b.style.width = v + '%'; };
+    function onLoadProgress(e) {
+      if (!e || !e.lengthComputable || !e.total) return;
+      realPg = true;
+      const frac = Math.min(1, e.loaded / e.total);
+      pg = Math.max(pg, frac * 96);                       // the last 4% is parsing and texture upload
+      setBar(pg);
+      $('load-label').textContent = 'Loading the home… ' + Math.round(frac * 100) + '%';
+    }
+
+    const loader = new GLTFLoader();
+    try {
+      loader.load('./confortable_appartment.glb', (gltf) => {
+        world = gltf.scene; markColliders();
+        // normalize scale & position: floor to y=0, centered, footprint ~10 units
+        const box = new THREE.Box3().setFromObject(world); const size = new THREE.Vector3(); box.getSize(size);
+        const s = 2.7 / (size.y || 2.7); world.scale.setScalar(s); // scale to a human ~2.7m ceiling
+        const box2 = new THREE.Box3().setFromObject(world); const c2 = new THREE.Vector3(); box2.getCenter(c2);
+        world.position.x -= c2.x; world.position.z -= c2.z; world.position.y -= box2.min.y; // floor at 0
+        // Convert to UNLIT (baked textures) + double-sided (interior walls often single-sided).
+        const conv = (mm) => { if (!mm) return mm; const nm = new THREE.MeshBasicMaterial({ map: mm.map || null, color: (mm.color ? mm.color.clone() : new THREE.Color(0xffffff)), transparent: !!mm.transparent, opacity: (mm.opacity != null ? mm.opacity : 1), alphaTest: mm.alphaTest || 0, side: THREE.DoubleSide }); nm.name = mm.name || ''; return nm; };
+        world.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.material = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material); } });
+        scene.add(world);
+        // Spawn in the living room (verified open spot), facing the lounge. Fractions of the model's
+        // footprint so it survives any re-scale; tuned to THIS apartment's layout.
+        const b3 = new THREE.Box3().setFromObject(world), mn = b3.min, mx = b3.max;
+        player.x = mn.x + (mx.x - mn.x) * 0.28;
+        player.z = mn.z + (mx.z - mn.z) * 0.58;
+        player.y = mn.y + 1.6;
+        player.yaw = 0;
+        setupDoor();
+      buildStrip();
+      setupBalconyDoor();
+      styleBedroomWalls();
+      buildBedspread();
+        ready = true; finishLoad();
+      }, onLoadProgress, (err) => { $('load-label').textContent = 'Could not load the model'; console.error(err); });
+    } catch (e) { $('load-label').textContent = 'Could not load the model'; console.error(e); }
+
+    const pit = setInterval(() => {
+      if (ready) { clearInterval(pit); return; }
+      if (realPg) return;                              // real bytes are driving the bar
+      pg = Math.min(92, pg + Math.random() * 16 + 6); setBar(pg);
+    }, 150);
+    function finishLoad() { setBar(100); $('load-label').textContent = 'Ready'; $('controls').style.display = 'block'; $('enter').style.display = 'inline-block'; $('tour-btn').style.display = 'inline-block'; }
+
+    // ---- controls ----
+    const keys = {}; let running = false, playing = false, veilTarget = 0, veilNow = 0;
+    // Embedded in a page, the arrow keys and space scroll the host document out from under the
+    // demo. Swallow their default. The guard matters: this listener is on the window, so without it
+    // space would stop activating the Enter and tour buttons for anyone driving them from the keyboard.
+    const SCROLL_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
+    const typingTarget = t => !!(t && t.closest && t.closest('button,a,input,textarea,select,[contenteditable]'));
+    addEventListener('keydown', e => {
+      if (SCROLL_KEYS.includes(e.code) && !typingTarget(e.target)) e.preventDefault();
+      keys[e.code] = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') running = true;
+    });
+    addEventListener('keyup', e => { keys[e.code] = false; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') running = false; });
+    const canvas = renderer.domElement; const SENS = 0.0024; let dragging = false;
+    canvas.addEventListener('webglcontextlost', e => e.preventDefault());
+    function look(dx, dy) { if (touring) return; if (Math.abs(dx) > 400 || Math.abs(dy) > 400) return; /* ignore pointer-lock warp spikes */ player.yaw -= dx * SENS; player.pitch -= dy * SENS; const l = Math.PI / 2 - 0.12; player.pitch = Math.max(-l, Math.min(l, player.pitch)); }
+    // requestPointerLock resolves to a promise in current Chrome, so try/catch alone misses a refusal
+    // (denied lock, unfocused document, Chrome's re-request throttle) and it surfaces as an unhandled
+    // rejection. Swallow it the same way fs() does below.
+    function lockP() {
+      return;                                              // simplified: drag to look, cursor stays visible
+      try {
+        if (!isTouch && canvas.requestPointerLock && document.pointerLockElement !== canvas) {
+          const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => { });
+        }
+      } catch (e) { }
+    }
+    function fs() { try { const fn = app.requestFullscreen || app.webkitRequestFullscreen; if (fn) { const r = fn.call(app); if (r && r.catch) r.catch(() => { }); } } catch (e) { } }
+    function focusApp() { try { app.focus({ preventScroll: true }); } catch (e) { } }
+    canvas.addEventListener('click', () => { if (playing && !isTouch) { focusApp(); lockP(); } });
+    addEventListener('mousemove', e => { if (document.pointerLockElement === canvas) look(e.movementX, e.movementY); else if (dragging) look(e.movementX || 0, e.movementY || 0); });
+    canvas.addEventListener('mousedown', () => { if (playing && !isTouch && document.pointerLockElement !== canvas) dragging = true; });
+    addEventListener('mouseup', () => dragging = false);
+    // touch
+    // The overlays live inside #app, so without this the walk/look rig steals every touch that lands
+    // on a panel: dragging to scroll the panel rotated the camera instead, and the unconditional
+    // preventDefault() below suppressed the scroll entirely.
+    const UI_SEL = '#panel,#panel2,#panel-btn,#alarm-bar,#tour-cap,#gate';
+    const uiTouch = t => !!(t.target && t.target.closest && t.target.closest(UI_SEL));
+    const TAP_SLOP = 12, TAP_MS = 400;                       // what still counts as a tap, not a drag
+    const stick = $('stick'), knob = stick.querySelector('i'); let mT = null, lT = null, mv = { x: 0, z: 0 };
+    function tryOpenNearPanel() { if (playing && nearP && !isOpen(nearP)) openPanel(nearP); }
+    app.addEventListener('touchstart', e => {
+      for (const t of e.changedTouches) {
+        if (uiTouch(t)) continue;                            // let the panel have it
+        const rec = { id: t.identifier, ox: t.clientX, oy: t.clientY, x: t.clientX, y: t.clientY, t0: performance.now(), moved: 0 };
+        if (t.clientX < innerWidth * 0.5 && mT === null) mT = rec; else if (lT === null) lT = rec;
+      }
+    }, { passive: true });
+    app.addEventListener('touchmove', e => {
+      let mine = false;
+      for (const t of e.changedTouches) {
+        if (mT && t.identifier === mT.id) {
+          mine = true;
+          const dx = t.clientX - mT.ox, dy = t.clientY - mT.oy, mag = Math.min(46, Math.hypot(dx, dy)), a = Math.atan2(dy, dx);
+          mT.moved = Math.max(mT.moved, Math.hypot(dx, dy));
+          knob.style.transform = `translate(${Math.cos(a) * mag}px,${Math.sin(a) * mag}px)`;
+          mv.x = Math.cos(a) * (mag / 46); mv.z = Math.sin(a) * (mag / 46);
+        }
+        if (lT && t.identifier === lT.id) {
+          mine = true;
+          lT.moved = Math.max(lT.moved, Math.hypot(t.clientX - lT.ox, t.clientY - lT.oy));
+          look((t.clientX - lT.x) * 2.1, (t.clientY - lT.y) * 2.1); lT.x = t.clientX; lT.y = t.clientY;
+        }
+      }
+      if (mine) e.preventDefault();                        // only when we actually own the gesture
+    }, { passive: false });
+    function tend(e) {
+      let tapped = false;
+      for (const t of e.changedTouches) {
+        const rec = (mT && t.identifier === mT.id) ? mT : ((lT && t.identifier === lT.id) ? lT : null);
+        if (rec && rec.moved < TAP_SLOP && performance.now() - rec.t0 < TAP_MS) tapped = true;
+        if (mT && t.identifier === mT.id) { mT = null; mv.x = mv.z = 0; knob.style.transform = 'translate(0,0)'; }
+        if (lT && t.identifier === lT.id) lT = null;
+      }
+      if (tapped && e.type === 'touchend') {
+        const t = e.changedTouches[0], now = performance.now();
+        if (lastTap && now - lastTap.t < 350 && Math.hypot(t.clientX - lastTap.x, t.clientY - lastTap.y) < 40) { lastTap = null; doubleAt(t.clientX, t.clientY); }
+        else { lastTap = { t: now, x: t.clientX, y: t.clientY }; tryOpenNearPanel(); }
+      }
+    }
+    let lastTap = null;
+    app.addEventListener('touchend', tend); app.addEventListener('touchcancel', tend);
+
+    // ---- collision ----
+    // This used to probe a single horizontal ray at eye - 0.6 = 1.0 m. A top-down scan of the flat
+    // found 11.8% of the floor plan is furniture topping out between 0.25 m and 0.90 m -- every sofa,
+    // dining table, bed and worktop -- so that ray sailed over all of it and only full-height walls
+    // ever stopped you. Stacking horizontal probes does not fix it either: a table at 0.58 m is missed
+    // by a low ray passing between its legs and a high one passing over its top.
+    // So there are two different questions, and one ray each:
+    //   1. is something full-height in the way?      horizontal probe at WALL_Y (walls, glazing, doors)
+    //   2. would I have to climb to get there?       downward probe at the destination vs STEP_MAX
+    const ray = new THREE.Raycaster();
+    const FLOOR_Y = 0.142;                 // the model's floor plane, measured off the geometry
+    const STEP_MAX = 0.30;                 // taller than this is furniture, not something you step over
+    const STEP_REACH = 1.10;               // how far down the step probe looks; overlaps WALL_Y
+    const WALL_Y = 0.95;
+    const PROBE_Y = [0.35, 0.95];           // unstick's push-out probes
+    const _down = new THREE.Vector3(0, -1, 0);
+    const _bo = new THREE.Vector3(), _bd = new THREE.Vector3();
+    // The collider set only changes when the model loads or a door is rigged, so rebuild it then
+    // rather than per ray -- blocked() and unstick() together cast a lot of them. It must NOT be tied
+    // to the frame loop: a blocked() call before the first tick would see an empty list and report
+    // that nothing blocks, which is exactly backwards.
+    let _colliders = [], _collidersDirty = true;
+    function markColliders() { _collidersDirty = true; }
+    function colliders() {
+      if (_collidersDirty) { _colliders = [world, doorPivot, ...EXTRA_DOORS.map(d => d.pivot)].filter(Boolean); _collidersDirty = false; }
+      return _colliders;
+    }
+    function blocked(ox, oz, dx, dz, dist) {
+      if (!world) return false;
+      _bd.set(dx, 0, dz); if (_bd.lengthSq() < 1e-12) return false;
+      _bd.normalize();
+      const far = dist + player.r;
+      ray.set(_bo.set(ox, WALL_Y, oz), _bd); ray.far = far;
+      const h = firstBlocking(ray.intersectObjects(colliders(), true));
+      if (h && h.distance < far) return true;
+      // Where the leading edge would land: is the surface there floor, or something to climb?
+      // Start below head height, or this ray hits the door lintels (2.065 m) and walls you off
+      // inside your own doorways. Anything taller than STEP_REACH is the WALL_Y probe's job.
+      ray.set(_bo.set(ox + _bd.x * far, FLOOR_Y + STEP_REACH, oz + _bd.z * far), _down); ray.far = STEP_REACH;
+      const g = ray.intersectObjects(colliders(), true);
+      return !!(g.length && (g[0].point.y - FLOOR_Y) > STEP_MAX);
+    }
+
+    // blocked() only ever refuses a move. With furniture close on several sides every direction
+    // can refuse at once and the player is stuck for good, so also push back out to clear space.
+    const unRay = new THREE.Raycaster(); const _uo = new THREE.Vector3();
+    const UNSTICK_DIRS = []; for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; UNSTICK_DIRS.push(new THREE.Vector3(Math.cos(a), 0, Math.sin(a))); }
+    function unstick(dt) {
+      if (!world) return;
+      const R = player.r;
+      let px = 0, pz = 0, minD = Infinity, openDir = null, openD = -1;
+      for (const d of UNSTICK_DIRS) {
+        let dist = Infinity;
+        for (const y of PROBE_Y) {                             // same two heights as blocked()
+          unRay.set(_uo.set(player.x, y, player.z), d); unRay.far = R * 1.6;
+          const h = firstBlocking(unRay.intersectObjects(colliders(), true));
+          if (h) dist = Math.min(dist, h.distance);
+        }
+        if (dist < minD) minD = dist;
+        if (dist > openD) { openD = dist; openDir = d; }
+        if (dist < R) { px -= d.x * (R - dist); pz -= d.z * (R - dist); }   // shove away from whatever is close
+      }
+      if (minD >= R) return;                                    // enough clearance, leave it alone
+      let l = Math.hypot(px, pz);
+      if (l < 1e-4) { if (!openDir) return; px = openDir.x; pz = openDir.z; l = 1; }  // pinned evenly: head for the most open side
+      const step = Math.min(1.5 * dt, (R - minD) + 0.002);           // settles as soon as it is clear
+      player.x += (px / l) * step; player.z += (pz / l) * step;
+    }
+
+    // ---- panel ----
+    $('panel-btn').addEventListener('click', () => { const p = PANELS[0]; isOpen(p) ? closePanel(p) : openPanel(p); });
+    $('sw-lights').addEventListener('click', () => { const on = !$('sw-lights').classList.contains('on'); $('sw-lights').classList.toggle('on', on); veilTarget = on ? (1 - lightLevel) * 0.85 : 0.93; toast(on ? 'Lights on' : 'Lights off'); });
+    $('sw-lock').addEventListener('click', () => { const on = !$('sw-lock').classList.contains('on'); $('sw-lock').classList.toggle('on', on); toast(on ? 'Front door locked' : 'Front door unlocked'); });
+    let toastT; function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 1500); }
+
+    // ---- wall panel: proximity prompt, open/close, and P-to-mount tuning ----
+    const wpPrompt = document.createElement('div');
+    wpPrompt.style.cssText = 'position:absolute;left:50%;top:57%;transform:translateX(-50%);z-index:7;font-size:13px;font-weight:600;color:#fff;background:rgba(6,16,30,.62);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);padding:8px 14px;border-radius:11px;pointer-events:none;opacity:0;transition:opacity .18s;white-space:nowrap;';
+    app.appendChild(wpPrompt);
+
+    // Two panels now: the hall's full house panel and the bedroom's square room panel.
+    // Whichever you are closest to (and facing) is the one E opens.
+    const PANELS = [
+      { grp: wallPanel, glow: panelGlow, el: 'panel', name: 'Smart panel' },
+      { grp: bedPanel, glow: bedGlow, el: 'panel2', name: 'Bedroom panel' },
+    ];
+    const PANEL_RANGE = 1.4, PANEL_DOT = 0.72;   // arm's length and looking fairly straight at it
+    let nearP = null, tAcc = 0;
+    const _toP = new THREE.Vector3(), _fwd = new THREE.Vector3(), _flat = new THREE.Vector3();
+    function isOpen(p) { return $(p.el).classList.contains('on'); }
+    function openPanelAny() { return PANELS.find(isOpen) || null; }
+    function panelView(v) { $('panel').dataset.view = v; }
+    function openPanel(p) {
+      for (const q of PANELS) if (q !== p) $(q.el).classList.remove('on');   // never two at once
+      panelView('main');                                                 // never mid-drill-down
+      $(p.el).classList.add('on');
+      const ex = () => { try { document.exitPointerLock && document.exitPointerLock(); } catch (e) { } }; ex(); setTimeout(ex, 90);
+    }
+    function closePanel(p) { $(p.el).classList.remove('on'); }
+
+    function updateWallPanel(t) {
+      if (!playing) { wpPrompt.style.opacity = '0'; nearP = null; return; }
+      _fwd.set(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+      let best = null, bestD = Infinity;
+      for (const p of PANELS) {
+        _toP.copy(p.grp.position).sub(camera.position);
+        const dist = _toP.length();
+        _flat.set(_toP.x, 0, _toP.z); if (_flat.lengthSq() > 0) _flat.normalize();
+        if (dist <= PANEL_RANGE && _fwd.dot(_flat) >= PANEL_DOT && dist < bestD) { best = p; bestD = dist; }
+      }
+      nearP = best;
+      const k = Math.sin(t * 4.5);
+      for (const p of PANELS) {
+        const hot = (p === nearP);
+        p.glow.material.opacity = hot ? 0.55 + 0.45 * k : 0.28;
+        p.glow.scale.setScalar(hot ? 1 + 0.18 * k : 1);
+      }
+      const show = nearP && !isOpen(nearP);
+      if (show) wpPrompt.textContent = 'Press E or click — ' + nearP.name;
+      wpPrompt.style.opacity = show ? '1' : '0';
+    }
+
+    // Aim at a wall and press P to mount the panel there; logs the values to paste above.
+    const _aimRay = new THREE.Raycaster(); const _dir = new THREE.Vector3(), _nrm = new THREE.Vector3(); const _nmat = new THREE.Matrix3();
+    function mountPanelAtAim() {
+      if (!world) { console.warn('[wallPanel] model not loaded yet'); return; }
+      camera.getWorldDirection(_dir); _dir.normalize();
+      _aimRay.set(camera.position, _dir); _aimRay.far = 6;
+      const hits = _aimRay.intersectObject(world, true);
+      if (!hits.length) { toast('No wall in view — aim at a wall'); console.warn('[wallPanel] no surface hit within 6m'); return; }
+      const h = hits[0];
+      if (h.face) { _nmat.getNormalMatrix(h.object.matrixWorld); _nrm.copy(h.face.normal).applyMatrix3(_nmat).normalize(); }
+      else { _nrm.copy(_dir).negate(); }
+      if (_nrm.dot(_dir) > 0) _nrm.negate();            // face back into the room
+      PANEL_POS.copy(h.point).addScaledVector(_nrm, 0.02);
+      PANEL_ROT_Y = Math.atan2(_nrm.x, _nrm.z);
+      applyPanelTransform();
+      const f = v => Number(v.toFixed(3));
+      console.log('[wallPanel] PANEL_POS = new THREE.Vector3(' + f(PANEL_POS.x) + ', ' + f(PANEL_POS.y) + ', ' + f(PANEL_POS.z) + ');');
+      console.log('[wallPanel] PANEL_ROT_Y = ' + f(PANEL_ROT_Y) + ';');
+      toast('Panel mounted — coords in console');
+    }
+
+    addEventListener('keydown', e => {
+      if (e.repeat) return;
+      if (e.code === 'KeyE' && playing) { const op = openPanelAny(); if (op) closePanel(op); else if (nearP) openPanel(nearP); }
+      else if (e.code === 'Escape') {
+        if (alarm) clearAlarm(false); else if (touring) endTour(false);
+        else { const op = openPanelAny(); if (op) closePanel(op); }
+      }
+      else if (e.code === 'KeyP' && playing) { mountPanelAtAim(); }
+      else if (e.code === 'KeyK' && playing) { pickDoorAtAim(); }
+      else if (e.code === 'KeyV' && playing) { toggleVoice(); }
+    });
+    canvas.addEventListener('click', () => { if (!isTouch) tryOpenNearPanel(); });   // touch goes through tend()
+    // the wall panel replaces the floating corner button once you are inside
+    $('enter').addEventListener('click', () => { $('panel-btn').style.display = 'none'; });
+
+    // ---- front door rig ----
+    const _dbox = new THREE.Box3(), _dc = new THREE.Vector3(), _ds = new THREE.Vector3();
+    function unrigDoor() {
+      if (doorPivot) { if (world) for (const m of doorParts) world.attach(m); scene.remove(doorPivot); doorPivot = null; markColliders(); }
+      doorParts = []; doorNow = 0; doorTarget = 0;
+    }
+    // The door is split across several meshes (one per material), so gather every mesh whose
+    // bbox centre sits within DOOR_GROUP_RADIUS of the seed and swing them as one unit.
+    function rigDoor(seed) {
+      unrigDoor();
+      _dbox.setFromObject(seed); _dbox.getCenter(_dc);
+      const anchor = _dc.clone();
+      const union = new THREE.Box3(); const parts = [];
+      world.traverse(o => {
+        if (!o.isMesh) return;
+        const b = new THREE.Box3().setFromObject(o); const c = new THREE.Vector3(); b.getCenter(c);
+        if (c.distanceTo(anchor) <= DOOR_GROUP_RADIUS) { parts.push(o); union.union(b); }
+      });
+      if (!parts.length) { parts.push(seed); union.setFromObject(seed); }
+      union.getCenter(_dc); union.getSize(_ds);
+      const widthAxis = _ds.x >= _ds.z ? 'x' : 'z';            // wider of world-X / world-Z
+      const hingeAtMin = (HINGE_SIDE === 'start');
+      const hx = widthAxis === 'x' ? (hingeAtMin ? union.min.x : union.max.x) : _dc.x;
+      const hz = widthAxis === 'z' ? (hingeAtMin ? union.min.z : union.max.z) : _dc.z;
+      doorPivot = new THREE.Group(); markColliders();
+      doorPivot.position.set(hx, union.min.y, hz);
+      scene.add(doorPivot);
+      for (const m of parts) doorPivot.attach(m);              // preserves world transform
+      doorParts = parts;
+      doorNow = doorTarget = 0; doorPivot.rotation.y = 0;
+      applyDoorFromToggle(true);
+      return { center: _dc.clone(), size: _ds.clone(), widthAxis, count: parts.length };
+    }
+    function applyDoorFromToggle(snap) {
+      const locked = $('sw-lock').classList.contains('on');     // 'on' (red) = locked = shut
+      doorTarget = locked ? 0 : OPEN_ANGLE * SWING_SIGN;
+      if (snap) doorNow = doorTarget;
+    }
+    // pick the mesh whose world-bbox centre is nearest DOOR_CENTER
+    function setupDoor() {
+      if (!world) return;
+      let best = null, bd = Infinity;
+      world.traverse(o => {
+        if (!o.isMesh) return;
+        _dbox.setFromObject(o); _dbox.getCenter(_dc);
+        const d = _dc.distanceTo(DOOR_CENTER);
+        if (d < bd) { bd = d; best = o; }
+      });
+      if (best) rigDoor(best);
+      for (const d of EXTRA_DOORS) buildExtraDoor(d);
+      mountDoorSensor();
+    }
+    $('sw-lock').addEventListener('click', () => applyDoorFromToggle(false));
+
+    // ---- built doors for the bedroom / bathroom openings ----
+    // Materials taken from the real front door so the leaves match: the thinnest of its
+    // meshes is the wood panel, the thickest is the chrome handle.
+    function frontDoorMats() {
+      let wood = null, chrome = null, tw = Infinity, tc = -1;
+      for (const m of doorParts) {
+        const b = new THREE.Box3().setFromObject(m); const sz = new THREE.Vector3(); b.getSize(sz);
+        const thin = Math.min(sz.x, sz.y, sz.z);
+        if (thin < tw) { tw = thin; wood = m.material; }
+        if (thin > tc) { tc = thin; chrome = m.material; }
+      }
+      const w = wood ? wood.clone() : new THREE.MeshBasicMaterial({ color: 0x6b4a33 });
+      const c = chrome ? chrome.clone() : new THREE.MeshBasicMaterial({ color: 0xc2c7cc });
+      w.side = THREE.DoubleSide; c.side = THREE.DoubleSide;
+      return { wood: w, chrome: c };
+    }
+    function disposeExtraDoor(d) {
+      if (!d.pivot) return;
+      d.pivot.traverse(o => {
+        if (!o.isMesh) return;
+        if (o.geometry) o.geometry.dispose();
+        for (const m of (Array.isArray(o.material) ? o.material : [o.material])) if (m) m.dispose();
+      });
+      scene.remove(d.pivot); d.pivot = null; markColliders();      // cloned mats: the front door is untouched
+    }
+    function buildExtraDoor(d) {
+      disposeExtraDoor(d);
+      if (!d.pos) return;
+      const M = frontDoorMats();
+      const ext = (d.hinge === 'start') ? 1 : -1;                       // which way the leaf runs from the hinge
+      const pivot = new THREE.Group(); pivot.position.copy(d.pos); pivot.rotation.y = d.rotY;
+      const leaf = new THREE.Mesh(new THREE.BoxGeometry(d.width, d.height, d.thickness), M.wood);
+      leaf.frustumCulled = false; leaf.position.set(ext * d.width / 2, d.height / 2, 0); pivot.add(leaf);
+      const hg = new THREE.BoxGeometry(0.03, 0.13, 0.03);           // chrome handle on the free edge, both faces
+      for (const z of [d.thickness / 2 + 0.02, -d.thickness / 2 - 0.02]) {
+        const hh = new THREE.Mesh(hg, M.chrome); hh.position.set(ext * (d.width - 0.08), 1.02, z); pivot.add(hh);
+      }
+      scene.add(pivot); d.pivot = pivot; d.now = 0; d.target = 0; markColliders();
+      applyExtraFromToggle(d, true);                              // starts shut, like the front door
+    }
+    function applyExtraFromToggle(d, snap) {
+      const locked = $(d.swId).classList.contains('on');           // 'on' (red) = locked = shut
+      d.target = locked ? 0 : OPEN_ANGLE * d.sign;
+      if (snap) d.now = d.target;
+    }
+    for (const d of EXTRA_DOORS) {
+      const el = $(d.swId); if (!el) continue;
+      el.addEventListener('click', () => {
+        const locked = !el.classList.contains('on'); el.classList.toggle('on', locked);
+        applyExtraFromToggle(d, false); toast(d.label + (locked ? ' locked' : ' unlocked'));
+      });
+    }
+
+    function updateLightTint(dt) {
+      // Tint follows whether the lamps are on, NOT how bright they are — dimming a warm bulb makes
+      // a room warmer, not greyer. Off means no tint at all, so a dark room never looks orange.
+      const want = $('sw-lights').classList.contains('on') ? 1 : 0;
+      lightOnNow += (want - lightOnNow) * (1 - Math.exp(-dt * 4));
+      _tintTarget.setHex(LIGHT_TEMPS[lightTempIdx][2]);
+      lightTint.material.color.copy(_white).lerp(_tintTarget, lightOnNow);
+      // The veil is what does the dimming, so its own colour decides what a dim room feels like.
+      // Left blue-black it made a candle-lit room look cold — the tint was fighting it. Under lamps
+      // it takes a dark cast of the lamp's own colour; with the lights off it goes back to night.
+      _warmDark.copy(_tintTarget).multiplyScalar(0.10);
+      _veilCol.copy(_night).lerp(_warmDark, lightOnNow);
+      veil.material.color.copy(_veilCol);
+    }
+    function setLightLevel(v) {
+      lightLevel = Math.max(0.1, Math.min(1, v));
+      if ($('sw-lights').classList.contains('on')) veilTarget = (1 - lightLevel) * 0.85;
+      paintLightsView();
+    }
+    function setLightTemp(i) { lightTempIdx = Math.max(0, Math.min(LIGHT_TEMPS.length - 1, i)); paintLightsView(); }
+
+    // ---- bedroom styling ----
+    // Three fixes to the room as the model ships it: bare white walls, white curtains against
+    // them, and a duvet whose printed artwork is not something to put in front of a client.
+    const BEDROOM_WALL = 0x86a894;                 // sage, multiplied over the plaster texture
+    // The bedroom's walls come from two different meshes. tl_km_v_michael_wall covers the door
+    // and living-room sides; the picture wall and the window wall use a material the model calls
+    // ..._kitchen_worktop_2 even though that mesh sits entirely inside the bedroom. Tinting only
+    // the first left two walls green and two white. The bounds check keeps the misleadingly named
+    // one from touching anything in the actual kitchen.
+    const BED_BOX = { x0: 2.10, x1: 6.60, z0: -3.98, z1: -1.45 };
+    function styleBedroomWalls() {
+      if (!world) return;
+      const bb = new THREE.Box3(), c = new THREE.Vector3();
+      world.traverse(o => {
+        if (!o.isMesh) return;
+        bb.setFromObject(o).getCenter(c);
+        const inBedroom = c.x > BED_BOX.x0 && c.x < BED_BOX.x1 && c.z > BED_BOX.z0 && c.z < BED_BOX.z1
+          && bb.min.x > BED_BOX.x0 - 0.4 && bb.max.x < BED_BOX.x1 + 0.4
+          && bb.min.z > BED_BOX.z0 - 0.4 && bb.max.z < BED_BOX.z1 + 0.4;
+        for (const m of (Array.isArray(o.material) ? o.material : [o.material])) {
+          if (!m) continue;
+          if (m.name === 'tl_km_v_michael_wall') m.color.setHex(BEDROOM_WALL);
+          else if (inBedroom && /worktop|plaster|wall/i.test(m.name)) m.color.setHex(BEDROOM_WALL);
+        }
+      });
+    }
+
+    // A flat sheet would hover over a draped duvet, so the cover is a grid that samples the
+    // existing surface and sits just above it. Footprint measured off the model: the mattress
+    // runs x 4.70..6.40, z -3.25..-2.05 with its top between 0.25 m and 0.45 m above the floor.
+    function bedspreadTex() {
+      const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+      const g = cv.getContext('2d');
+      g.fillStyle = '#3f5570'; g.fillRect(0, 0, 128, 128);
+      g.strokeStyle = 'rgba(255,255,255,.05)'; g.lineWidth = 1;
+      for (let i = 0; i < 128; i += 4) {                       // a quiet linen weave
+        g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 128); g.stroke();
+        g.beginPath(); g.moveTo(0, i); g.lineTo(128, i); g.stroke();
+      }
+      g.strokeStyle = 'rgba(0,0,0,.10)';
+      for (let i = 2; i < 128; i += 16) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 128); g.stroke(); }
+      const t = new THREE.CanvasTexture(cv);
+      t.encoding = THREE.sRGBEncoding;             // without this the weave renders washed out
+      t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 4);
+      return t;
+    }
+    function buildBedspread() {
+      // A sampled heightfield followed the duvet's folds but could not describe where it turns
+      // down over the edge, and skirting every boundary produced ragged fringes wherever the
+      // sampling had holes. A fitted cover is both simpler and tidier: the duvet is roughly a
+      // rounded box anyway. Measured: mattress x 4.70..6.40, z -3.25..-2.05, top 0.25..0.45 above
+      // the floor — so a top at 0.46 clears every fold, and the sides hang over the edge.
+      const X0 = 4.58, X1 = 6.18, Z0 = -3.30, Z1 = -2.00;      // stops short of the pillows
+      const TOP = FLOOR_Y + 0.47, BOT = FLOOR_Y + 0.12;
+      const geo = new THREE.BoxGeometry(X1 - X0, TOP - BOT, Z1 - Z0);
+      const spread = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: bedspreadTex() }));
+      spread.position.set((X0 + X1) / 2, (TOP + BOT) / 2, (Z0 + Z1) / 2);
+      spread.frustumCulled = false;
+      scene.add(spread);
+    }
+
+    // ---- balcony: sky, and a motorised sliding door ----
+    // There is a real balcony out past the glazing — tiled floor from x -6.40 to -4.45 across the
+    // whole frontage, a 0.64 m parapet, open above — but nothing to look at, so stepping out felt
+    // like walking into a void. A gradient sky with a distant skyline fixes that.
+    function skyTex() {
+      const cv = document.createElement('canvas'); cv.width = 64; cv.height = 512;
+      const g = cv.getContext('2d');
+      const gr = g.createLinearGradient(0, 0, 0, 512);
+      gr.addColorStop(0.00, '#123a63');       // zenith
+      gr.addColorStop(0.45, '#4a7fa8');
+      gr.addColorStop(0.70, '#9dbcd0');
+      gr.addColorStop(0.86, '#e2c9a8');       // haze at the horizon
+      gr.addColorStop(1.00, '#8d8272');
+      g.fillStyle = gr; g.fillRect(0, 0, 64, 512);
+      const t = new THREE.CanvasTexture(cv);
+      t.encoding = THREE.sRGBEncoding;
+      t.wrapS = THREE.RepeatWrapping;
+      return t;
+    }
+    function skylineTex() {
+      const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 256;
+      const g = cv.getContext('2d');
+      g.clearRect(0, 0, 2048, 256);
+      let seed = 90210;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      for (const [alpha, scale] of [[0.30, 0.55], [0.58, 1.0]]) {   // a far haze layer, then nearer
+        g.fillStyle = 'rgba(41,52,68,' + alpha + ')';
+        let x = 0;
+        while (x < 2048) {
+          const w = 26 + rnd() * 70, h = (30 + rnd() * 150) * scale;
+          g.fillRect(x, 256 - h, w, h);
+          x += w + rnd() * 16;
+        }
+      }
+      g.fillStyle = 'rgba(255,214,150,0.5)';                         // a scatter of lit windows
+      for (let i = 0; i < 300; i++) g.fillRect(rnd() * 2048, 256 - rnd() * rnd() * 148, 3, 4);
+      const t = new THREE.CanvasTexture(cv);
+      t.encoding = THREE.sRGBEncoding;
+      return t;
+    }
+    // The darkness veil and the colour-temperature tint are spheres drawn with depthTest off, so
+    // they paint over everything queued before them — the sky included, which turned it to grey
+    // soup. The outdoors draws *after* both instead, and takes its own gentler dimming in frame().
+    const OUTDOOR = [];
+    const sky = new THREE.Mesh(new THREE.SphereGeometry(90, 24, 16),
+      new THREE.MeshBasicMaterial({ map: skyTex(), side: THREE.BackSide, transparent: true, depthWrite: false }));
+    sky.renderOrder = 1002; scene.add(sky); OUTDOOR.push(sky);
+    const skyline = new THREE.Mesh(new THREE.CylinderGeometry(78, 78, 30, 48, 1, true),
+      new THREE.MeshBasicMaterial({ map: skylineTex(), side: THREE.BackSide, transparent: true, depthWrite: false }));
+    skyline.position.y = 5; skyline.renderOrder = 1003; scene.add(skyline); OUTDOOR.push(skyline);
+    // Without a ground the gradient ran all the way down, so looking over the parapet showed sky.
+    // The disc sits 10 m below the floor — three or four storeys — and runs well past the skyline
+    // so its rim never reads as a cliff edge; a radial fade takes it into the horizon haze instead.
+    function groundTex() {
+      const cv = document.createElement('canvas'); cv.width = 256; cv.height = 256;
+      const g = cv.getContext('2d');
+      const gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+      gr.addColorStop(0.00, 'rgba(51,58,68,1)');
+      gr.addColorStop(0.10, 'rgba(59,66,77,1)');
+      gr.addColorStop(0.22, 'rgba(94,99,108,0.92)');
+      gr.addColorStop(0.34, 'rgba(140,140,136,0.45)');   // dissolve into the haze rather than
+      gr.addColorStop(0.46, 'rgba(157,150,138,0)');      // ending on a visible rim
+      g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+      const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; return t;
+    }
+    const ground = new THREE.Mesh(new THREE.CircleGeometry(260, 64),
+      new THREE.MeshBasicMaterial({ map: groundTex(), side: THREE.DoubleSide, transparent: true, depthWrite: false }));
+    ground.rotation.x = -Math.PI / 2; ground.position.y = -10;
+    ground.renderOrder = 1002; scene.add(ground); OUTDOOR.push(ground);
+    for (const o of OUTDOOR) o.userData.base = o.material.color.clone();
+    // Lights-off dims the view out of the window, but only a little: the street does not go dark
+    // because someone flicked a switch indoors.
+    function updateOutdoor() {
+      const od = 1 - veilNow * 0.60;
+      for (const o of OUTDOOR) o.material.color.copy(o.userData.base).multiplyScalar(od);
+    }
+
+    // The glazing is one merged mesh spanning the whole flat, so there is no pane to slide and no
+    // way to cut a hole in it. Clipping planes carve a permanent doorway out of it instead —
+    // clipIntersection discards a fragment only when it is behind every plane, which is exactly
+    // the inside of this box — and a leaf of our own slides across that opening.
+    // Measured by raycasting the frontage at x -4.44: jamb to z 0.29, glazed bay 0.30-1.71,
+    // mullion 1.72-1.85, a second bay 1.86-3.27. The leaf fills the first bay exactly and parks
+    // over the second. Vertically the pane runs 0.29-2.13 with a sill below and a lintel above.
+    const SLIDE_X = -4.46, SLIDE_Z0 = 0.30, SLIDE_Z1 = 1.71, SLIDE_W = SLIDE_Z1 - SLIDE_Z0;
+    const SLIDE_TRAVEL = SLIDE_W + 0.14;          // clears the bay and covers the mullion
+    let sliderOpen = false, slideNow = 0, glassMesh = null;
+    const slider = new THREE.Group();
+    {
+      const pane = new THREE.Mesh(new THREE.BoxGeometry(0.022, 1.90, SLIDE_W),
+        new THREE.MeshBasicMaterial({ color: 0xbcd8e4, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
+      pane.position.y = 1.02; slider.add(pane);
+      const alu = new THREE.MeshBasicMaterial({ color: 0x9aa3ad });
+      const bar = (w, h, d, x, y, z) => {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), alu);
+        m.position.set(x, y, z); slider.add(m);
+      };
+      bar(0.04, 0.05, SLIDE_W, 0, 0.07, 0);                 // bottom rail
+      bar(0.04, 0.05, SLIDE_W, 0, 1.97, 0);                 // top rail
+      bar(0.04, 1.95, 0.05, 0, 1.02, -SLIDE_W / 2 + 0.025); // stiles
+      bar(0.04, 1.95, 0.05, 0, 1.02, SLIDE_W / 2 - 0.025);
+      // The leaf slides towards +z to open, so the closing edge — and the handle — is the -z one.
+      bar(0.05, 0.30, 0.03, 0.03, 1.05, -SLIDE_W / 2 + 0.16); // handle
+    }
+    slider.visible = false; scene.add(slider);
+
+    function setupBalconyDoor() {
+      if (!world) return;
+      world.traverse(o => {
+        if (!o.isMesh) return;
+        for (const m of (Array.isArray(o.material) ? o.material : [o.material]))
+          // The glazing is transparent but still wrote depth, so the skyline — queued after it —
+          // failed the depth test and the city vanished the moment you looked through a window.
+          if (m && m.name === 'glass') { glassMesh = o; m.depthWrite = false; }
+      });
+      if (!glassMesh) return;
+      renderer.localClippingEnabled = true;
+      const V = THREE.Vector3, P = THREE.Plane;
+      const mat = Array.isArray(glassMesh.material) ? glassMesh.material[0] : glassMesh.material;
+      mat.clippingPlanes = [
+        new P(new V(-1, 0, 0), -4.75), new P(new V(1, 0, 0), 4.20),   // the balcony wall only
+        new P(new V(0, 0, -1), SLIDE_Z0 - 0.01), new P(new V(0, 0, 1), -(SLIDE_Z1 + 0.01)),
+        new P(new V(0, -1, 0), -1), new P(new V(0, 1, 0), -2.45),
+      ];
+      mat.clipIntersection = true;
+      mat.needsUpdate = true;
+      slider.position.set(SLIDE_X, FLOOR_Y, (SLIDE_Z0 + SLIDE_Z1) / 2);
+      slider.visible = true;
+    }
+    function updateSlider(dt) {
+      slideNow += ((sliderOpen ? 1 : 0) - slideNow) * (1 - Math.exp(-dt * 3.2));
+      slider.position.z = (SLIDE_Z0 + SLIDE_Z1) / 2 + slideNow * SLIDE_TRAVEL;
+    }
+    // With the leaf slid aside the doorway has to stop blocking, but the glazing is one mesh so it
+    // cannot be removed from the collider set without opening every window in the flat. Ignore
+    // hits on the glass only inside this aperture, and only once the leaf has actually moved.
+    function sliderPassable(hit) {
+      if (slideNow < 0.55 || !glassMesh || hit.object !== glassMesh) return false;
+      const p = hit.point;
+      return p.x > -4.80 && p.x < -4.15 && p.z > SLIDE_Z0 + 0.04 && p.z < SLIDE_Z1 - 0.04;
+    }
+    function firstBlocking(hits) {
+      for (const x of hits) if (!sliderPassable(x)) return x;
+      return null;
+    }
+
+    // ---- RGB cove strip ----
+    // The brown cornice runs along the wall/ceiling junction; the ceiling itself is flat at 2.70
+    // everywhere, so there is no soffit to follow — the line has to be traced off the walls.
+    // Rays are fired horizontally just under the ceiling from several standing spots, and every
+    // wall they land on gets a short quad laid flush against it. Bedroom and bathroom are excluded:
+    // this is the open living/hall/kitchen run the cornice actually wraps.
+    const STRIP_Y = 2.585, STRIP_H = 0.024, STRIP_WATT = 18, STRIP_MIN_RUN = 0.15;
+    const stripCore = new THREE.Mesh(new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({ color: 0xffb46b, transparent: true, opacity: 0, side: THREE.DoubleSide }));
+    const stripBloom = new THREE.Mesh(new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({ color: 0xffb46b, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+    stripCore.renderOrder = 1000; stripBloom.renderOrder = 1001;   // stays lit through the darkness veil
+    stripCore.visible = stripBloom.visible = false;
+    scene.add(stripCore); scene.add(stripBloom);
+
+    let stripOn = false, stripNow = 0, stripCycle = false;
+    const stripColour = new THREE.Color(0xffb46b);
+
+    function inClosedRoom(x, z) {
+      for (const r of ROOMS) if (x > r.min.x && x < r.max.x && z > r.min.z && z < r.max.z) return true;
+      return false;
+    }
+    function buildStrip() {
+      if (!world) return;
+      const t0 = performance.now();
+      // Raycasting the whole flat cost ~9.6s here: the bathroom, kitchen and living-room prop
+      // meshes are 47k of the model's 51k triangles and every ray tested all of them. A cornice
+      // trace only needs walls, ceiling and trim — and dropping the props also stops rays being
+      // swallowed by tall furniture before they reach a wall, so coverage improves as well.
+      const targets = [];
+      world.traverse(o => {
+        if (!o.isMesh) return;
+        const m = (o.material && o.material.name) || '';
+        if (/wall|plaster|tile|ceiling|trim/i.test(m)) targets.push(o);
+      });
+      if (!targets.length) {                       // unnamed materials: fall back to anything tall
+        const bb = new THREE.Box3();
+        world.traverse(o => { if (o.isMesh && bb.setFromObject(o).max.y > 2.4) targets.push(o); });
+      }
+      if (!targets.length) return;
+      // Spread out enough that every stretch of cornice is in line of sight from somewhere —
+      // a wall nobody can see never gets traced, which is what left gaps in the first pass.
+      const VANTAGE = [[-2.94, 0.64], [-1.60, -1.30], [1.00, -1.60], [1.20, -2.70],
+      [-2.90, 2.20], [2.40, 1.60], [0.20, 0.60], [-3.60, -2.60]];
+      const RAYS = 540;
+      const r2 = new THREE.Raycaster(), dir = new THREE.Vector3(), org = new THREE.Vector3();
+      const nmat = new THREE.Matrix3();
+      const walls = new Map(), core = [], bloom = [];
+      // One quad per ray hit leaves gaps: neighbouring rays land further apart the further they
+      // travel. Spanning between consecutive hits on the same wall gives a continuous run instead.
+      const span = (arr, a, b, n, halfH) => {          // a/b need only x and z
+        const ox = n.x * 0.012, oz = n.z * 0.012;
+        const ax = a.x + ox, az = a.z + oz, bx = b.x + ox, bz = b.z + oz;
+        const y0 = STRIP_Y - halfH, y1 = STRIP_Y + halfH;
+        arr.push(ax, y0, az, bx, y0, bz, bx, y1, bz, ax, y0, az, bx, y1, bz, ax, y1, az);
+      };
+      for (const [vx, vz] of VANTAGE) {
+        org.set(vx, STRIP_Y, vz);
+        const hits = new Array(RAYS).fill(null);
+        for (let i = 0; i < RAYS; i++) {
+          const a = i / RAYS * Math.PI * 2;
+          dir.set(Math.cos(a), 0, Math.sin(a));
+          r2.set(org, dir); r2.far = 13;
+          const h = r2.intersectObjects(targets, true);
+          if (!h.length || !h[0].face) continue;
+          const p = h[0].point;
+          if (inClosedRoom(p.x, p.z)) continue;
+          nmat.getNormalMatrix(h[0].object.matrixWorld);
+          const n = h[0].face.normal.clone().applyMatrix3(nmat).normalize();
+          if (Math.abs(n.y) > 0.35) continue;                    // walls only
+          if (n.dot(dir) > 0) n.negate();                        // face back into the room
+          hits[i] = { p: p.clone(), n };
+        }
+        for (let i = 0; i < RAYS; i++) {
+          const a = hits[i], b = hits[(i + 1) % RAYS];
+          if (!a || !b) continue;
+          if (a.n.dot(b.n) < 0.9) continue;                      // a corner, not a run
+          const d = a.p.distanceTo(b.p);
+          // A long run is fine — the normal check above already stops it turning a corner, and at
+          // 2.585 m every doorway has solid wall above its lintel, so bridging one is correct.
+          if (d < 1e-4 || d > 2.5) continue;
+          // Collect as an interval on the wall's own plane rather than emitting a quad here.
+          // Deduping quads by midpoint left gaps: two vantages see overlapping but unequal
+          // stretches of the same wall, and dropping one as a "duplicate" drops what it covered.
+          const nx = Math.round(a.n.x * 50) / 50, nz = Math.round(a.n.z * 50) / 50;
+          const off = Math.round((nx * a.p.x + nz * a.p.z) * 50) / 50;
+          const tx = -nz, tz = nx;                               // tangent along the wall
+          const s1 = tx * a.p.x + tz * a.p.z, s2 = tx * b.p.x + tz * b.p.z;
+          const key = nx + ',' + nz + ',' + off;
+          let w = walls.get(key);
+          if (!w) { w = { nx, nz, off, tx, tz, iv: [] }; walls.set(key, w); }
+          w.iv.push(s1 < s2 ? [s1, s2] : [s2, s1]);
+        }
+      }
+      // Merge each wall's intervals into runs, verify there is wall behind them, then close the
+      // corners. Three separate jobs, because each one was leaving a different kind of gap.
+      const _p = new THREE.Vector3(), _d = new THREE.Vector3();
+      const out = [];
+      const STEP = 0.08;
+      for (const w of walls.values()) {
+        w.iv.sort((p, q) => p[0] - q[0]);
+        let cur = null;
+        // A run may bridge up to 2.5 m along a plane — right over a doorway, where there is solid
+        // wall above the lintel, but wrong over a wide opening, where the strip would hang in
+        // mid-air. So sample along it and keep only the stretches with wall behind them.
+        const backed = (sx) => {
+          const px = w.nx * w.off + w.tx * sx, pz = w.nz * w.off + w.tz * sx;
+          r2.set(_p.set(px + w.nx * 0.06, STRIP_Y, pz + w.nz * 0.06), _d.set(-w.nx, 0, -w.nz));
+          r2.far = 0.25;
+          return r2.intersectObjects(targets, true).length > 0;
+        };
+        const flush = () => {
+          // Short corner returns are kept now. They were dropped when stray unbacked quads were
+          // being blamed on them; with every run verified against real wall, the returns are what
+          // carry the strip around a step instead of leaving a notch there.
+          if (!cur || cur[1] - cur[0] < STRIP_MIN_RUN) return;
+          const n = Math.max(2, Math.ceil((cur[1] - cur[0]) / STEP));
+          const ok = [];
+          for (let i = 0; i <= n; i++) ok.push(backed(cur[0] + (cur[1] - cur[0]) * i / n));
+          // Bridge one or two failed samples: a lintel edge or a seam in the mesh should not
+          // chop a wall in half. Only a real opening leaves a long stretch unbacked.
+          for (let i = 1; i < n; i++)
+            if (!ok[i] && ok[i - 1] && (ok[i + 1] || (ok[i + 2] && (ok[i + 1] = true)))) ok[i] = true;
+          let start = null;
+          for (let i = 0; i <= n; i++) {
+            const sx = cur[0] + (cur[1] - cur[0]) * i / n;
+            if (ok[i]) { if (start === null) start = sx; }
+            else if (start !== null) { out.push({ w, s0: start, s1: sx }); start = null; }
+          }
+          if (start !== null) out.push({ w, s0: start, s1: cur[1] });
+        };
+        for (const v of w.iv) {
+          if (!cur) { cur = [v[0], v[1]]; continue; }
+          if (v[0] <= cur[1] + 0.08) cur[1] = Math.max(cur[1], v[1]);   // overlap or a hair's gap
+          else { flush(); cur = [v[0], v[1]]; }
+        }
+        flush();
+      }
+      // Close the corners. Rays cannot land exactly on a corner and the normal test ends a run
+      // just short of one, so every corner was a visible notch. Where two perpendicular runs
+      // nearly meet, extend both to the exact point where their planes cross.
+      const at = (r, sx) => [r.w.nx * r.w.off + r.w.tx * sx, r.w.nz * r.w.off + r.w.tz * sx];
+      for (let i = 0; i < out.length; i++) for (let j = i + 1; j < out.length; j++) {
+        const A = out[i], B = out[j];
+        const det = A.w.nx * B.w.nz - A.w.nz * B.w.nx;
+        if (Math.abs(det) < 0.3) continue;                              // parallel-ish, no corner
+        const cx = (A.w.off * B.w.nz - B.w.off * A.w.nz) / det;
+        const cz = (A.w.nx * B.w.off - B.w.nx * A.w.off) / det;
+        for (const r of [A, B]) {
+          const sc = r.w.tx * cx + r.w.tz * cz;                         // corner along this wall
+          if (Math.abs(sc - r.s0) < 0.5 && sc < r.s0) r.s0 = sc;
+          else if (Math.abs(sc - r.s1) < 0.5 && sc > r.s1) r.s1 = sc;
+        }
+      }
+      let runs = 0;
+      for (const r of out) {
+        if (r.s1 - r.s0 < 0.12) continue;
+        const a = at(r, r.s0), b = at(r, r.s1), n = { x: r.w.nx, z: r.w.nz };
+        span(core, { x: a[0], z: a[1] }, { x: b[0], z: b[1] }, n, STRIP_H / 2);
+        span(bloom, { x: a[0], z: a[1] }, { x: b[0], z: b[1] }, n, STRIP_H * 1.9);
+        runs++;
+      }
+      stripCore.geometry.setAttribute('position', new THREE.Float32BufferAttribute(core, 3));
+      stripBloom.geometry.setAttribute('position', new THREE.Float32BufferAttribute(bloom, 3));
+      stripCore.frustumCulled = stripBloom.frustumCulled = false;
+      console.log('[strip] ' + runs + ' runs across ' + walls.size + ' wall planes, from '
+        + targets.length + ' meshes in ' + Math.round(performance.now() - t0) + 'ms');
+    }
+
+    function updateStrip(dt, t) {
+      stripNow += ((stripOn ? 1 : 0) - stripNow) * (1 - Math.exp(-dt * 5));
+      if (stripCycle && stripOn) stripColour.setHSL((t * 0.07) % 1, 0.85, 0.58);
+      stripCore.material.color.copy(stripColour);
+      stripBloom.material.color.copy(stripColour);
+      stripCore.material.opacity = stripNow;
+      stripBloom.material.opacity = stripNow * 0.38;
+      stripCore.visible = stripBloom.visible = stripNow > 0.01;
+    }
+
+    const STRIP_COLOURS = [['Warm', 0xffb46b], ['Cool', 0xcfe6ff], ['Red', 0xff3b3b], ['Amber', 0xff9d2e],
+    ['Green', 0x3bd67a], ['Cyan', 0x2ee0e0], ['Blue', 0x3b7bff], ['Violet', 0xa05cff]];
+    function setStripColour(hex) { stripCycle = false; stripColour.setHex(hex); paintStripView(); }
+
+    const tempBox = $('temp-swatches');
+    LIGHT_TEMPS.forEach(([name, k, hex], i) => {
+      const b = document.createElement('button');
+      b.title = name + ' · ' + k + 'K';
+      b.style.background = '#' + hex.toString(16).padStart(6, '0');
+      b.addEventListener('click', () => { setLightTemp(i); if (!$('sw-lights').classList.contains('on')) $('sw-lights').click(); });
+      tempBox.appendChild(b);
+    });
+    function paintLightsView() {
+      const pct = Math.round(lightLevel * 100);
+      $('dim-val').textContent = pct + '%';
+      if ($('dim').value != pct) $('dim').value = pct;
+      const [name, k] = LIGHT_TEMPS[lightTempIdx];
+      $('temp-name').textContent = name + ' · ' + k + 'K';
+      [...tempBox.children].forEach((b, i) => b.classList.toggle('sel', i === lightTempIdx));
+      setSw('sw-lights2', $('sw-lights').classList.contains('on'));
+    }
+    $('dim').addEventListener('input', () => setLightLevel(Number($('dim').value) / 100));
+    $('sw-lights2').addEventListener('click', () => $('sw-lights').click());
+    $('sw-lights').addEventListener('click', paintLightsView);
+    paintLightsView();
+
+    $('sw-slider').addEventListener('click', () => {
+      const shut = !$('sw-slider').classList.contains('on');
+      setSw('sw-slider', shut);
+      sliderOpen = !shut;                       // 'on' = shut, as with the other doors
+      toast(shut ? 'Balcony door closed' : 'Balcony door open');
+      for (const b of document.querySelectorAll('#panel .scene')) b.classList.remove('active');
+    });
+
+    const stripSwatchBox = $('strip-swatches');
+    for (const [name, hex] of STRIP_COLOURS) {
+      const b = document.createElement('button');
+      b.title = name; b.dataset.hex = hex;
+      b.style.background = '#' + hex.toString(16).padStart(6, '0');
+      b.addEventListener('click', () => { setStripColour(hex); if (!stripOn) setStrip(true); });
+      stripSwatchBox.appendChild(b);
+    }
+    function paintStripView() {
+      for (const b of stripSwatchBox.children)
+        b.classList.toggle('sel', !stripCycle && Number(b.dataset.hex) === stripColour.getHex());
+      setSw('sw-stripcycle', stripCycle);
+      setSw('sw-strip', stripOn); setSw('sw-strip2', stripOn);
+    }
+    function setStrip(on) {
+      stripOn = on; paintStripView();
+      toast(on ? 'Cove strip on' : 'Cove strip off');
+      for (const b of document.querySelectorAll('#panel .scene')) b.classList.remove('active');
+    }
+    for (const id of ['sw-strip', 'sw-strip2'])
+      $(id).addEventListener('click', () => setStrip(!$(id).classList.contains('on')));
+    $('sw-stripcycle').addEventListener('click', () => {
+      stripCycle = !stripCycle; if (stripCycle && !stripOn) setStrip(true);
+      paintStripView(); toast(stripCycle ? 'Cove strip cycling' : 'Cove strip colour held');
+    });
+    paintStripView();
+
+    // ---- automations ----
+    // These rules already ran the house; they were just invisible and unswitchable. Each one is
+    // enforced at a single point below, so turning it off genuinely stops the behaviour rather
+    // than only greying out a row: switch off presence lighting, walk into the bedroom, and the
+    // lights stay down.
+    const AUTOMATIONS = [
+      {
+        id: 'presence', on: true, name: 'Presence lighting', last: 0,
+        when: 'Someone walks into a room', then: 'Bring that room’s lights up, hold 3s after they leave'
+      },
+      {
+        id: 'hob', on: true, name: 'Unattended hob', last: 0,
+        when: 'The hob is left on and the kitchen is empty for 12s', then: 'Trip the smoke alarm'
+      },
+      {
+        id: 'safe', on: true, name: 'Fire safe state', last: 0,
+        when: 'Smoke is detected', then: 'Lights up, every door released, TV off, curtains open'
+      },
+      {
+        id: 'valve', on: true, name: 'Leak shut-off', last: 0,
+        when: 'Water is detected under the basin', then: 'Close the supply valve'
+      },
+      {
+        id: 'balconylight', on: true, name: 'Balcony light on the door', last: 0,
+        when: 'The balcony door opens', then: 'Bring the outdoor light up, drop it again when it shuts'
+      },
+      {
+        id: 'autoclear', on: true, name: 'Auto-acknowledge', last: 0,
+        when: 'An alarm is left unacknowledged', then: 'Clear it after a few seconds'
+      },
+    ];
+    const autoBy = id => AUTOMATIONS.find(a => a.id === id);
+    const autoOn = id => { const a = autoBy(id); return !a || a.on; };
+    function autoFired(id) { const a = autoBy(id); if (a) a.last = Date.now(); }
+
+    // ---- presence sensors (Aqara FP2) + per-room auto lighting ----
+    // Room volumes and the two mounting spots were measured by raycasting the model.
+    const sensorTex = new THREE.TextureLoader().load('./aqara_fp2.png');
+    sensorTex.encoding = THREE.sRGBEncoding;
+    sensorTex.offset.set(0.185, 0.2375); sensorTex.repeat.set(0.630, 0.525);  // crop to the device (alpha bounds)
+    const ROOM_DARK = 0.94, ROOM_HOLD = 3.0;                                    // hold lights ~3s after you leave
+    const ROOMS = [
+      {
+        id: 'bedroom', label: 'Bedroom', swIds: ['sw-bedlight', 'sw2-bedlight', 'sw-grp-bedroom'],
+        min: new THREE.Vector3(2.15, 0, -3.82), max: new THREE.Vector3(6.53, 2.7, -1.50),
+        sPos: new THREE.Vector3(3.60, 2.15, -1.50), sRot: Math.PI
+      },      // on the door wall, facing into the room
+      {
+        id: 'bathroom', label: 'Bathroom', swIds: ['sw-bathlight', 'sw-grp-bathroom'],
+        min: new THREE.Vector3(3.47, 0, -1.31), max: new THREE.Vector3(6.53, 2.7, 2.76),
+        sPos: new THREE.Vector3(3.47, 2.15, 0.20), sRot: Math.PI / 2
+      },
+    ];
+    for (const r of ROOMS) {
+      const size = new THREE.Vector3().subVectors(r.max, r.min);
+      const dark = new THREE.Mesh(new THREE.BoxGeometry(size.x - 0.04, size.y - 0.04, size.z - 0.04),
+        new THREE.MeshBasicMaterial({
+          color: 0x05070f, transparent: true, opacity: ROOM_DARK,
+          side: THREE.DoubleSide, depthWrite: false
+        }));
+      dark.position.copy(r.min).add(r.max).multiplyScalar(0.5);
+      dark.renderOrder = 900; scene.add(dark); r.dark = dark; r.lit = 0; r.hold = 0; r.manual = null;
+      const g = new THREE.Group(); g.position.copy(r.sPos); g.rotation.y = r.sRot;
+      g.add(new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.142),
+        new THREE.MeshBasicMaterial({ map: sensorTex, transparent: true, side: THREE.DoubleSide, depthWrite: false })));
+      const led = new THREE.Mesh(new THREE.CircleGeometry(0.008, 14),
+        new THREE.MeshBasicMaterial({ color: 0x9aa3ad, transparent: true, opacity: .35, side: THREE.DoubleSide, depthTest: false }));
+      led.position.set(0.055, -0.045, 0.006); led.renderOrder = 1001; g.add(led);
+      scene.add(g); r.led = led;
+    }
+    // Walk in and the sensor picks you up; the room fades back down a few seconds after you leave.
+    for (const r of ROOMS) {
+      for (const id of r.swIds) {                   // a room's light shows on every panel that lists it
+        const el = $(id); if (!el) continue;
+        el.addEventListener('click', () => {
+          r.manual = !el.classList.contains('on');
+          toast(r.label + (r.manual ? ' light on' : ' light off'));
+          for (const b of document.querySelectorAll('#panel .scene')) b.classList.remove('active');
+        });
+      }
+    }
+    // the master switch drives the common area and both rooms together
+    $('sw-lights').addEventListener('click', () => {
+      const on = $('sw-lights').classList.contains('on');
+      for (const r of ROOMS) r.manual = on;
+    });
+    function updateRooms(dt, t) {
+      for (const r of ROOMS) {
+        const inside = player.x > r.min.x && player.x < r.max.x && player.z > r.min.z && player.z < r.max.z;
+        const presence = autoOn('presence');
+        if (inside && !r.wasInside && presence) { r.manual = null; }   // walking in hands control back to presence,
+        r.wasInside = inside;                                  // but a switch you flip while inside sticks
+        if (inside && presence) {
+          if (r.hold <= 0) { toast(r.label + ' presence detected — lights on'); autoFired('presence'); }
+          r.hold = ROOM_HOLD;
+        }
+        else r.hold = Math.max(0, r.hold - dt);
+        const want = (r.manual !== null) ? (r.manual ? 1 : 0) : (r.hold > 0 ? 1 : 0);
+        r.lit += (want - r.lit) * (1 - Math.exp(-dt * 3.2));
+        for (const id of r.swIds) { const el = $(id); if (el) el.classList.toggle('on', r.lit > 0.5); }   // switches mirror the real light
+        const op = ROOM_DARK * (1 - r.lit * lightLevel);          // a dimmed room stays partly dark
+        r.dark.material.opacity = op; r.dark.visible = op > 0.01;
+        const k = Math.sin(t * 5);
+        r.led.material.color.setHex(r.hold > 0 ? 0x37d67a : 0x9aa3ad);
+        r.led.material.opacity = r.hold > 0 ? 0.6 + 0.4 * k : 0.35;
+      }
+    }
+
+    // ---- TV screen + motorised curtains (measured off the model) ----
+    // TV panel: 1.96 x 1.24 at z=-3.69 facing +Z.  Glazing: x=-4.44, z -1.41..3.27, y 0.29..2.13.
+    // Brand mark for the screen. Reading a bitmap back out of a canvas taints it on file://
+    // origins, and WebGL then refuses the upload, so probe once and fall back to the wordmark.
+    const brandImg = new Image(); let brandOk = false;
+    brandImg.onload = () => {
+      try {
+        const t = document.createElement('canvas'); t.width = t.height = 2;
+        const c = t.getContext('2d'); c.drawImage(brandImg, 0, 0, 2, 2); c.getImageData(0, 0, 1, 1); brandOk = true;
+      }
+      catch (e) { brandOk = false; }
+      drawTvScreen(); drawPanelScreen(); drawBedPanel();
+    };
+    brandImg.src = './ishara-logo-trans.png';
+
+    const TV_W = 1.88, TV_H = 1.16, TV_POS = new THREE.Vector3(-1.56, 1.64, -3.684);
+    const tvCv = document.createElement('canvas'); tvCv.width = 512; tvCv.height = 316;
+    let tvTex = null;                    // declared up here: drawTvScreen() runs before it exists
+    function drawTvScreen() {
+      const g = tvCv.getContext('2d'), W = tvCv.width, H = tvCv.height;
+      const gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#12314f'); gr.addColorStop(.55, '#1d4b6e'); gr.addColorStop(1, '#0b1b2c');
+      g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      g.globalAlpha = .30; g.fillStyle = '#7cc0ff';
+      for (const c of [[110, 90, 70], [360, 70, 46], [250, 210, 110], [430, 230, 60]]) { g.beginPath(); g.arc(c[0], c[1], c[2], 0, Math.PI * 2); g.fill(); }
+      g.globalAlpha = 1;
+      g.fillStyle = 'rgba(4,10,18,.55)'; g.fillRect(0, H - 58, W, 58);
+      g.textBaseline = 'top';
+      if (brandOk) { const bh = 26, bw = bh * brandImg.width / brandImg.height; g.drawImage(brandImg, 24, H - 46, bw, bh); }
+      else { g.fillStyle = '#eaf1fb'; g.font = '600 22px Inter,system-ui,sans-serif'; g.fillText('Ishara', 24, H - 44); }
+      g.fillStyle = '#7cc0ff'; g.font = '500 15px Inter,system-ui,sans-serif';
+      g.textAlign = 'right'; g.fillText('Now playing · Matter cast', W - 24, H - 40); g.textAlign = 'left';
+      if (tvTex) tvTex.needsUpdate = true;
+    }
+    drawTvScreen();
+    tvTex = new THREE.CanvasTexture(tvCv); tvTex.encoding = THREE.sRGBEncoding;
+    const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(TV_W, TV_H),
+      new THREE.MeshBasicMaterial({ map: tvTex, transparent: true, opacity: 0 }));
+    tvScreen.position.copy(TV_POS); tvScreen.renderOrder = 1000; tvScreen.visible = false; scene.add(tvScreen);
+    let tvOn = false, tvNow = 0;
+
+    // Living-room glazing, and the bedroom window: glass at x=6.608 with the wall face at 6.537,
+    // the opening swept out at z -3.160..-2.220 by y 1.240..2.180 — a 0.94 m square. Both windows
+    // run along z, so one rig builder serves them.
+    const CUR_X = -4.40, CUR_Z0 = -1.45, CUR_Z1 = 3.31, CUR_Y = 1.15, CUR_H = 2.10;
+    const BCUR_X = 6.49, BCUR_Z0 = -3.26, BCUR_Z1 = -2.12, BCUR_Y = 1.73, BCUR_H = 1.10;
+    function foldTex(base) {                                   // cheap vertical folds so it reads as fabric
+      const cv = document.createElement('canvas'); cv.width = 128; cv.height = 4; const g = cv.getContext('2d');
+      for (let i = 0; i < 128; i++) {
+        const v = 0.70 + 0.30 * Math.abs(Math.sin(i / 128 * Math.PI * 6));
+        const c = base || [233, 225, 211];
+        g.fillStyle = 'rgb(' + Math.round(c[0] * v) + ',' + Math.round(c[1] * v) + ',' + Math.round(c[2] * v) + ')'; g.fillRect(i, 0, 1, 4);
+      }
+      const t = new THREE.CanvasTexture(cv); t.wrapS = THREE.RepeatWrapping; return t;
+    }
+    function curtainRig(x, z0, z1, y, h, gather, thick, base) {
+      const span = (z1 - z0) / 2, leaves = [];
+      for (const side of [0, 1]) {
+        const geo = new THREE.BoxGeometry(thick, h, 1); geo.translate(0, 0, side ? -0.5 : 0.5);
+        const tex = foldTex(base);
+        const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
+        m.position.set(x, y, side ? z1 : z0); m.frustumCulled = false;
+        scene.add(m); leaves.push({ mesh: m, tex: tex });
+      }
+      return { leaves, span, gather };
+    }
+    function driveCurtains(rig, now) {                       // now: 0 = shut, 1 = fully drawn back
+      const cover = rig.span - (rig.span - rig.gather) * now;
+      for (const c of rig.leaves) { c.mesh.scale.z = cover; c.tex.repeat.x = Math.max(1, cover * 2.2); }
+    }
+    const curtains = curtainRig(CUR_X, CUR_Z0, CUR_Z1, CUR_Y, CUR_H, 0.30, 0.035);
+    const bedCurtains = curtainRig(BCUR_X, BCUR_Z0, BCUR_Z1, BCUR_Y, BCUR_H, 0.16, 0.030, [168, 116, 96]);
+    let curtainOpen = true, curtainNow = 0;
+    let bedCurtainOpen = true, bedCurtainNow = 0;
+    function applyTv(on, snap) { tvOn = on; if (snap) tvNow = on ? 1 : 0; }
+    function applyCurtain(open, snap) { curtainOpen = open; if (snap) curtainNow = open ? 1 : 0; }
+    const BEDCUR_SW = ['sw-bedcurtain', 'sw2-bedcurtain'];        // house panel + bedroom wall panel
+    function applyBedCurtain(open, snap) {
+      bedCurtainOpen = open; if (snap) bedCurtainNow = open ? 1 : 0;
+      for (const id of BEDCUR_SW) setSw(id, open);
+    }
+    function updateActuators(dt) {
+      tvNow += ((tvOn ? 1 : 0) - tvNow) * (1 - Math.exp(-dt * 4.5));
+      tvScreen.material.opacity = tvNow; tvScreen.visible = tvNow > 0.01;
+      curtainNow += ((curtainOpen ? 1 : 0) - curtainNow) * (1 - Math.exp(-dt * 3.0));
+      driveCurtains(curtains, curtainNow);
+      bedCurtainNow += ((bedCurtainOpen ? 1 : 0) - bedCurtainNow) * (1 - Math.exp(-dt * 3.0));
+      driveCurtains(bedCurtains, bedCurtainNow);
+    }
+    $('sw-tv').addEventListener('click', () => {
+      const on = !$('sw-tv').classList.contains('on');
+      $('sw-tv').classList.toggle('on', on); applyTv(on, false); toast(on ? 'TV on' : 'TV off');
+    });
+    $('sw-curtain').addEventListener('click', () => {
+      const open = !$('sw-curtain').classList.contains('on');
+      $('sw-curtain').classList.toggle('on', open); applyCurtain(open, false); toast(open ? 'Curtains opened' : 'Curtains closed');
+    });
+    for (const id of BEDCUR_SW) $(id).addEventListener('click', () => {
+      const open = !$(id).classList.contains('on');
+      applyBedCurtain(open, false); toast(open ? 'Bedroom curtains opened' : 'Bedroom curtains closed');
+      for (const b of document.querySelectorAll('#panel .scene')) b.classList.remove('active');
+    });
+    applyCurtain(true, true); applyTv(false, true); applyBedCurtain(true, true);
+
+    // ---- kitchen hob: gives the smoke alarm something real to detect ----
+    // Worktop measured flat at y=0.855 across x 2.5..3.25; the extractor hood sits over z 1.8..2.4,
+    // so the cooktop goes under it. Leave it on and walk away and the alarm fires for a real reason.
+    const HOB = new THREE.Vector3(2.85, 0.862, 2.10), HOB_GRACE = 12;      // seconds unattended before it smokes
+    const KITCHEN = { x0: 2.30, x1: 3.60, z0: 0.80, z1: 3.30 };
+    const hobPlate = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.014, 0.50),
+      new THREE.MeshBasicMaterial({ color: 0x14171c }));
+    hobPlate.position.copy(HOB); scene.add(hobPlate);
+    const hobRings = [];
+    for (const [ox, oz] of [[-0.135, -0.115], [0.135, -0.115], [-0.135, 0.115], [0.135, 0.115]]) {
+      const r = new THREE.Mesh(new THREE.RingGeometry(0.045, 0.072, 24),
+        new THREE.MeshBasicMaterial({ color: 0x2a2f36, transparent: true, opacity: .9, side: THREE.DoubleSide }));
+      r.rotation.x = -Math.PI / 2; r.position.set(HOB.x + ox, HOB.y + 0.009, HOB.z + oz);
+      scene.add(r); hobRings.push(r);
+    }
+    function smokeSpriteTex() {
+      const cv = document.createElement('canvas'); cv.width = cv.height = 64; const g = cv.getContext('2d');
+      const gr = g.createRadialGradient(32, 32, 2, 32, 32, 30);
+      gr.addColorStop(0, 'rgba(210,210,214,.85)'); gr.addColorStop(1, 'rgba(210,210,214,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(cv);
+    }
+    const smokeTex = smokeSpriteTex(), smokePuffs = [];
+    for (let i = 0; i < 7; i++) {
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: smokeTex, transparent: true, opacity: 0, depthWrite: false }));
+      sp.position.copy(HOB); sp.visible = false; scene.add(sp);
+      smokePuffs.push({ sp, t: i / 7 });
+    }
+    let hobOn = false, hobUnattended = 0, hobSmoking = false, hobWarned = false;
+    function setHob(on) {
+      hobOn = on;
+      if (!on) {
+        hobUnattended = 0; hobSmoking = false; hobWarned = false;
+        if (alarm === 'smoke') clearAlarm(true);
+      }
+    }
+    function updateHob(dt) {
+      const inKitchen = player.x > KITCHEN.x0 && player.x < KITCHEN.x1 && player.z > KITCHEN.z0 && player.z < KITCHEN.z1;
+      if (hobOn) {
+        if (inKitchen) { hobUnattended = 0; hobWarned = false; } else hobUnattended += dt;
+        if (!hobSmoking && hobUnattended > HOB_GRACE * 0.65 && !hobWarned) {
+          hobWarned = true; toast('Hob left unattended in the kitchen');
+        }
+        if (!hobSmoking && hobUnattended > HOB_GRACE && autoOn('hob')) {
+          hobSmoking = true; autoFired('hob'); raiseAlarm('smoke', 'the hob left on in the kitchen');
+        }
+        if (hobSmoking && !alarm) raiseAlarm('smoke', 'the hob left on in the kitchen');   // stays alarming until it is off
+      }
+      const glow = hobOn ? (hobSmoking ? 0.9 : 0.55) : 0;
+      for (const r of hobRings) {
+        r.material.color.setHex(hobOn ? (hobSmoking ? 0xff5a3c : 0xd8451f) : 0x2a2f36);
+        r.material.opacity = hobOn ? 0.55 + 0.45 * glow : 0.9;
+      }
+      for (const p of smokePuffs) {
+        if (!hobSmoking) { p.sp.visible = false; continue; }
+        p.sp.visible = true; p.t += dt * 0.42; if (p.t > 1) p.t -= 1;
+        const k = p.t;
+        p.sp.position.set(HOB.x + Math.sin(k * 7.5 + p.sp.id) * 0.11, HOB.y + 0.04 + k * 1.15, HOB.z + Math.cos(k * 6.1 + p.sp.id) * 0.09);
+        const sc = 0.14 + k * 0.42; p.sp.scale.set(sc, sc, sc);
+        p.sp.material.opacity = Math.sin(k * Math.PI) * 0.5;
+      }
+    }
+    $('sw-hob').addEventListener('click', () => {
+      const on = !$('sw-hob').classList.contains('on');
+      $('sw-hob').classList.toggle('on', on); setHob(on);
+      toast(on ? 'Hob on — it will alarm if left unattended' : 'Hob off');
+    });
+
+    // ---- thermostat ----
+    // Mounted on the clear wall just right of the TV (which ends at x=-0.58), clear of the planter.
+    let tempNow = 19.4, tempSet = 21.0;
+    function climateMode() { const d = tempSet - tempNow; return d > 0.3 ? 'Heating' : (d < -0.3 ? 'Cooling' : 'Idle'); }
+    function modeColour() { const m = climateMode(); return m === 'Heating' ? '#ff9d5c' : (m === 'Cooling' ? '#6cc6ff' : '#7f97b4'); }
+    const thermoCv = document.createElement('canvas'); thermoCv.width = 256; thermoCv.height = 256;
+    const tctx = thermoCv.getContext('2d');
+    const thermoTex = new THREE.CanvasTexture(thermoCv); thermoTex.encoding = THREE.sRGBEncoding;
+    const thermoBody = new THREE.Mesh(new THREE.BoxGeometry(0.125, 0.125, 0.022),
+      new THREE.MeshBasicMaterial({ color: 0x11161f }));
+    thermoBody.position.set(-0.30, 1.45, -3.812); scene.add(thermoBody);
+    const thermoFace = new THREE.Mesh(new THREE.PlaneGeometry(0.108, 0.108),
+      new THREE.MeshBasicMaterial({ map: thermoTex, transparent: true }));
+    thermoFace.position.set(-0.30, 1.45, -3.799); thermoFace.renderOrder = 1000; scene.add(thermoFace);
+    // Until now this was scenery: it showed climate but every other device in the flat could be
+    // operated where it physically is, and this one could only be reached from the house panel.
+    const thermoGlow = new THREE.Mesh(new THREE.RingGeometry(0.007, 0.012, 24),
+      new THREE.MeshBasicMaterial({ color: 0x3B9CF0, transparent: true, opacity: .9, side: THREE.DoubleSide, depthTest: false }));
+    thermoGlow.position.set(-0.262, 1.410, -3.795); thermoGlow.renderOrder = 1000; scene.add(thermoGlow);
+    PANELS.push({ grp: thermoBody, glow: thermoGlow, el: 'panel3', name: 'Thermostat' });
+    function drawThermostat() {
+      const g = tctx, S = 256;
+      g.clearRect(0, 0, S, S);
+      g.fillStyle = '#0b1220'; g.beginPath();
+      if (g.roundRect) g.roundRect(0, 0, S, S, 26); else g.rect(0, 0, S, S);
+      g.fill();
+      const col = modeColour();
+      g.strokeStyle = 'rgba(255,255,255,.10)'; g.lineWidth = 9;
+      g.beginPath(); g.arc(S / 2, S / 2, 96, Math.PI * 0.75, Math.PI * 2.25); g.stroke();
+      const frac = Math.max(0, Math.min(1, (tempSet - 14) / (28 - 14)));
+      g.strokeStyle = col; g.lineCap = 'round';
+      g.beginPath(); g.arc(S / 2, S / 2, 96, Math.PI * 0.75, Math.PI * 0.75 + frac * Math.PI * 1.5); g.stroke();
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = '#eaf1fb'; g.font = '600 62px Inter,system-ui,sans-serif';
+      g.fillText(tempSet.toFixed(1) + '°', S / 2, S / 2 - 14);
+      g.fillStyle = col; g.font = '600 20px Inter,system-ui,sans-serif';
+      g.fillText(climateMode().toUpperCase(), S / 2, S / 2 + 30);
+      g.fillStyle = '#61758c'; g.font = '500 17px Inter,system-ui,sans-serif';
+      g.fillText('now ' + tempNow.toFixed(1) + '°', S / 2, S / 2 + 58);
+      g.textAlign = 'left'; g.textBaseline = 'top';
+      thermoTex.needsUpdate = true;
+      const nowEl = $('temp-now'); if (nowEl) nowEl.textContent = tempNow.toFixed(1) + '°';
+      const modeEl = $('climate-mode'); if (modeEl) modeEl.textContent = climateMode();
+    }
+    function setTemp(v) {
+      tempSet = Math.max(14, Math.min(28, Math.round(v * 2) / 2));
+      for (const el of document.querySelectorAll('.temp-val')) el.textContent = tempSet.toFixed(1) + '°';
+      drawThermostat();
+    }
+    function updateClimate(dt) {
+      const before = tempNow;
+      tempNow += (tempSet - tempNow) * (1 - Math.exp(-dt * 0.12));      // room follows the setpoint slowly
+      if (Math.abs(tempNow - before) > 0.004) drawThermostat();
+    }
+    for (const b of document.querySelectorAll('.temp-up')) b.addEventListener('click', () => { setTemp(tempSet + 0.5); toast('Setpoint ' + tempSet.toFixed(1) + '° · ' + climateMode()); });
+    for (const b of document.querySelectorAll('.temp-dn')) b.addEventListener('click', () => { setTemp(tempSet - 0.5); toast('Setpoint ' + tempSet.toFixed(1) + '° · ' + climateMode()); });
+    setTemp(tempSet); drawThermostat();
+
+    // ---- contact / leak / smoke sensors ----
+    // Front door leaf spans x 0.77..1.62 at z=-3.895, hinged at max-x, so the latch edge (and the
+    // contact pair) sits at the low-x end. Bathroom floor and living-room ceiling from the room scan.
+    const SENSOR_WHITE = 0xf2f4f7, LED_OK = 0x37d67a, LED_ALERT = 0xe05555;
+    function ledMat() {
+      return new THREE.MeshBasicMaterial({
+        color: LED_OK, transparent: true, opacity: .85,
+        side: THREE.DoubleSide, depthTest: false
+      });
+    }
+    // contact: fixed half on the frame, magnet half rides the door leaf
+    const contactFrame = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.075, 0.022),
+      new THREE.MeshBasicMaterial({ color: SENSOR_WHITE }));
+    contactFrame.position.set(0.705, 1.52, -3.79); scene.add(contactFrame);
+    const contactMagnet = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.06, 0.018),
+      new THREE.MeshBasicMaterial({ color: SENSOR_WHITE }));
+    contactMagnet.position.set(0.790, 1.52, -3.79); scene.add(contactMagnet);
+    const contactLed = new THREE.Mesh(new THREE.CircleGeometry(0.006, 12), ledMat());
+    contactLed.position.set(0.705, 1.565, -3.775); contactLed.renderOrder = 1001; scene.add(contactLed);
+    function mountDoorSensor() { if (doorPivot) doorPivot.attach(contactMagnet); }   // so it swings with the leaf
+    // leak puck on the bathroom floor
+    const leakPuck = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.038, 0.014, 18),
+      new THREE.MeshBasicMaterial({ color: SENSOR_WHITE }));
+    leakPuck.position.set(3.72, 0.007, -0.55); scene.add(leakPuck);
+    const leakLed = new THREE.Mesh(new THREE.CircleGeometry(0.009, 12), ledMat());
+    leakLed.rotation.x = -Math.PI / 2; leakLed.position.set(3.72, 0.016, -0.55); leakLed.renderOrder = 1001; scene.add(leakLed);
+    // smoke alarm on the living-room ceiling
+    const smokeDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.026, 22),
+      new THREE.MeshBasicMaterial({ color: SENSOR_WHITE }));
+    smokeDisc.position.set(-1.50, 2.684, -1.50); scene.add(smokeDisc);
+    const smokeLed = new THREE.Mesh(new THREE.CircleGeometry(0.008, 12), ledMat());
+    smokeLed.rotation.x = Math.PI / 2; smokeLed.position.set(-1.45, 2.669, -1.50); smokeLed.renderOrder = 1001; scene.add(smokeLed);
+
+    let contactOpen = false, leakAlert = false;
+    // ---- alarm handling ----
+    // A real alert does more than tint an LED: it drives the whole house into a safe state.
+    let smokeAlarm = false, leakValve = false, alarm = null, alarmT = 0;
+    const alarmFlash = document.createElement('div'); alarmFlash.id = 'alarm-flash'; app.appendChild(alarmFlash);
+    const alarmBar = document.createElement('div'); alarmBar.id = 'alarm-bar';
+    const alarmTxt = document.createElement('div');
+    const alarmClear = document.createElement('button'); alarmClear.id = 'alarm-clear'; alarmClear.textContent = 'Clear';
+    alarmBar.appendChild(alarmTxt); alarmBar.appendChild(alarmClear); app.appendChild(alarmBar);
+    function showBar(kind, title, sub) {
+      alarmTxt.innerHTML = '<b>' + kind + ' alarm</b>' + title + ' — ' + sub;
+      alarmBar.style.display = 'flex';
+      alarmFlash.classList.toggle('on', kind === 'Smoke');
+    }
+    function raiseAlarm(kind, why) {
+      if (alarm === kind) return;
+      alarm = kind; alarmT = kind === 'smoke' ? 9000 : 7000;
+      if (kind === 'smoke') {
+        smokeAlarm = true;
+        const safe = autoOn('safe');
+        if (safe) {
+          autoFired('safe');
+          setSw('sw-lights', true); veilTarget = 0;                       // light the escape route
+          setSw('sw-lock', false); applyDoorFromToggle(false);          // release the lock, as fire codes require
+          setSw('sw-bed', false); applyExtraFromToggle(EXTRA_DOORS[0], false);
+          setSw('sw-bath', false); applyExtraFromToggle(EXTRA_DOORS[1], false);
+          setSw('sw-tv', false); applyTv(false, false);
+          setSw('sw-curtain', true); applyCurtain(true, false);
+          applyBedCurtain(true, false);                                 // every window, not just the lounge
+          for (const r of ROOMS) r.manual = true;
+          for (const b of document.querySelectorAll('#panel .scene')) b.classList.remove('active');
+        }
+        showBar('Smoke', 'Smoke detected — ' + (why || 'living room'),
+          safe ? 'lights on, every door released' : 'safe state is switched off — nothing was opened');
+      } else {
+        leakAlert = true;
+        const valve = autoOn('valve');
+        if (valve) { leakValve = true; ROOMS[1].manual = true; autoFired('valve'); }
+        showBar('Leak', 'Water leak under the bathroom basin',
+          valve ? 'supply valve closed automatically' : 'shut-off is switched off — the valve stayed open');
+      }
+    }
+    function clearAlarm(quiet) {
+      if (!alarm) return;
+      if (alarm === 'smoke') smokeAlarm = false; else { leakAlert = false; leakValve = false; }
+      alarm = null; alarmT = 0;
+      alarmBar.style.display = 'none'; alarmFlash.classList.remove('on');
+      for (const r of ROOMS) r.manual = null;                            // hand the rooms back to presence
+      if (!quiet) toast(hobSmoking ? 'Alarm cleared — but the hob is still on'
+        : 'Alarm cleared — home back to normal');
+    }
+    alarmClear.addEventListener('click', () => clearAlarm(false));
+    for (const b of document.querySelectorAll('#panel .test'))
+      b.addEventListener('click', () => raiseAlarm(b.dataset.test));
+    function leakTest() { raiseAlarm('leak'); }                        // kept for the guided tour
+
+    function updateSensors(dt, t) {
+      contactOpen = Math.abs(doorNow) > 0.08;                 // driven by the real door angle
+      contactLed.material.color.setHex(contactOpen ? LED_ALERT : LED_OK);
+      if (alarm && autoOn('autoclear') && (alarmT -= dt * 1000) <= 0) { autoFired('autoclear'); clearAlarm(true); }
+      const pulse = 0.55 + 0.45 * Math.sin(t * 5), fast = 0.35 + 0.65 * Math.abs(Math.sin(t * 9));
+      leakLed.material.color.setHex(leakAlert ? LED_ALERT : LED_OK);
+      leakLed.material.opacity = leakAlert ? fast : 0.5;
+      smokeLed.material.color.setHex(smokeAlarm ? LED_ALERT : LED_OK);
+      smokeLed.material.opacity = smokeAlarm ? fast : 0.35 + 0.25 * Math.sin(t * 1.4);
+      contactLed.material.opacity = contactOpen ? pulse : 0.55;
+    }
+
+    // ---- guided tour ----
+    // Flies the camera along an authored route, firing each device as it arrives so the whole
+    // system demos itself. Coordinates come from the same measurements the devices were placed with.
+    let touring = false, tourIdx = -1, tourT = 0, tourPhase = 'idle', tourLeg = 0, tourCut = 0;
+    const TOUR = [
+      {
+        pos: [-2.94, 0.64], look: [-1.56, -3.69], hold: 2800, title: 'Welcome',
+        text: 'Every device here speaks Matter — lights, locks, blinds, climate, energy, and presence, contact, leak and smoke sensors. Say “hey RiVa” to any of it, or drive it from a panel.'
+      },
+      {
+        pos: [-1.60, -1.30], look: [-1.56, -3.69], hold: 2800, title: 'Living room',
+        text: 'The TV is a Matter endpoint too — switch it from a panel, by voice, or fold it into a scene.',
+        on() { setSw('sw-tv', true); applyTv(true, false); }
+      },
+      {
+        // curtains and the cove strip share a beat: both are the lounge putting itself in a mood
+        pos: [-2.90, 0.60], look: [-4.44, 0.60], hold: 3400, title: 'Curtains & cove',
+        text: 'Motorised curtains across the glazing, and an RGB strip along the cornice — sixteen million colours on the same network.',
+        on() {
+          setSw('sw-tv', false); applyTv(false, false);
+          setSw('sw-curtain', false); applyCurtain(false, false);
+          stripCycle = false; stripColour.setHex(0x2ee0e0); stripOn = true; paintStripView();
+        }
+      },
+      {
+        // the curtains stop drew them shut, so open them again before we head for the door
+        pos: [-3.40, 1.00], look: [-4.60, 1.00], hold: 4000, title: 'Balcony door',
+        text: 'The slider is motorised, with a contact sensor on the jamb — watch the magnet ride away as it opens. The light outside is not on a timer; it is following that sensor.',
+        on() {
+          setSw('sw-curtain', true); applyCurtain(true, false);
+          sliderOpen = true; setSw('sw-slider', false);        // 'on' = shut
+        }
+      },
+      {
+        // The leg out is clear once the leaf has moved, so this one walks rather than cuts — but
+        // only just: blocked() probes player.r past the destination, and the parapet's inner face
+        // is at x -6.51, so standing any further out than about -6.10 makes the tour fade to black.
+        pos: [-6.00, 1.00], look: [-4.69, 1.00], pitch: 0.45, hold: 4400, title: 'Out on the balcony',
+        text: 'The lantern over the door is just another Matter endpoint — same panel, same voice, same scenes. Leaving home shuts the door behind you and drops it.'
+      },
+      {
+        pos: [-0.30, -2.80], look: [-0.30, -3.81], pitch: -0.15, hold: 3400, title: 'Climate',
+        text: 'The thermostat is a walk-up device like any other. Nudge it here or from a panel — every screen in the house agrees on the number.',
+        on() { setSw('sw-curtain', true); applyCurtain(true, false); setTemp(23.0); }
+      },
+      {
+        pos: [1.00, -1.60], look: [1.97, -1.61], hold: 3000, title: 'Wall panel', panel: 'main',
+        text: 'The S9E-11 by the door runs the whole house. Walk up to any panel and press E.'
+      },
+      {
+        pos: [1.00, -1.60], look: [1.97, -1.61], hold: 4600, title: 'Automations', panel: 'auto',
+        text: 'And these are the rules doing it on their own. Switch one off — presence lighting, say — walk into the bedroom, and the lights stay down. Nothing here is scripted.'
+      },
+      {
+        pos: [1.20, -2.70], look: [1.19, -3.90], hold: 3400, title: 'Front door',
+        text: 'A Matter smart lock, plus a contact sensor on the frame — watch the magnet separate as it opens.',
+        on() { setSw('sw-lock', false); applyDoorFromToggle(false); }
+      },
+      {
+        // the old tour spent a stop opening the door and another noticing the sensor; one will do
+        pos: [2.70, -2.30], look: [3.60, -1.50], hold: 3600, title: 'Bedroom presence',
+        text: 'Interior doors are motorised too, and the Aqara FP2 above this one picks you up and brings the bedroom lights straight on.',
+        on() {
+          setSw('sw-lock', true); applyDoorFromToggle(false);
+          setSw('sw-bed', false); applyExtraFromToggle(EXTRA_DOORS[0], false);
+        }
+      },
+      {
+        pos: [4.05, -2.30], look: [4.05, -1.49], hold: 4200, title: 'Room panel', roomPanel: true,
+        text: 'A square panel by the bed, scoped to this room alone — its light and its curtains, closing now.',
+        on() { applyBedCurtain(false, false); }
+      },
+      {
+        pos: [4.30, -0.70], look: [3.72, -0.55], hold: 4200, title: 'Bathroom & leak',
+        text: 'Same pattern through here — door, presence, lights. And a leak sensor on the floor: this is a test alert, and the valve shuts on its own.',
+        on() { setSw('sw-bath', false); applyExtraFromToggle(EXTRA_DOORS[1], false); leakTest(); }
+      },
+      {
+        pos: [2.10, 1.60], look: [2.85, 2.10], pitch: -0.55, hold: 4400, title: 'Hob & energy', panel: 'energy',
+        text: 'Every device reports what it draws. Watch the total as the hob lights — and leaving it on gives the smoke alarm something real to find.',
+        on() { clearAlarm(true); setSw('sw-hob', true); setHob(true); }
+      },
+      {
+        pos: [-1.50, 0.30], look: [-1.50, -1.50], pitch: 0.40, hold: 5200, title: 'Smoke alarm',
+        text: 'Unattended, it trips — and a real alert does more than beep: lights up, every door released, curtains open, TV off.',
+        on() { raiseAlarm('smoke', 'the hob left on in the kitchen'); }
+      },
+      {
+        pos: [-1.90, -1.20], look: [-0.55, -2.70], hold: 5600, title: 'Add a device', panel: 'add',
+        text: 'Adding one is a scan and a wait. Bluetooth, Thread, a certificate, a room — and a lamp that was not here a moment ago.',
+        on() {
+          clearAlarm(true); setSw('sw-hob', false); setHob(false);
+          if (lampAdded) decommissionLamp();
+          panelView('add'); addRender('pair', 0);
+        }
+      },
+      {
+        pos: [-1.20, -1.20], look: [-1.56, -3.69], hold: 4000, title: 'Scenes',
+        text: 'And one tap runs all of it: Movie night drops the lights to 10% and warm, turns the cove blue, wakes the TV and the new lamp, and draws the curtains.',
+        on() { applyScene('movie'); }
+      },
+    ];
+    // The tour camera walks straight lines between stops and ignores collision, so the long legs
+    // (bathroom to lounge, bedroom back through the hall) cut clean through walls. Dip to black
+    // across those transits so they read as a cut rather than a glitch; short hops stay continuous.
+    const tourFade = document.createElement('div');
+    tourFade.style.cssText = 'position:absolute;inset:0;z-index:10;background:#060d18;opacity:0;pointer-events:none;';
+    app.appendChild(tourFade);
+    const tourCap = document.createElement('div'); tourCap.id = 'tour-cap';
+    const tourTxt = document.createElement('div');
+    const tourSkip = document.createElement('button'); tourSkip.id = 'tour-skip'; tourSkip.textContent = 'Skip';
+    tourCap.appendChild(tourTxt); tourCap.appendChild(tourSkip); app.appendChild(tourCap);
+    function startTour() {
+      if (!ready) return;
+      $('gate').classList.add('hide'); app.classList.add('playing'); playing = true; focusApp();
+      veilNow = 0.93; applyScene('morning');
+      touring = true; tourIdx = -1; tourCap.style.display = 'flex'; nextTourStop();
+    }
+    function endTour(done) {
+      touring = false; tourPhase = 'idle'; tourCap.style.display = 'none'; tourFade.style.opacity = '0';
+      for (const p of PANELS) closePanel(p);
+      if (done) { applyScene('morning'); toast('Tour complete — the home is yours'); }
+      else toast('Tour skipped');
+      if (!isTouch) setTimeout(lockP, 60);
+    }
+    function nextTourStop() {
+      tourIdx++;
+      if (tourIdx >= TOUR.length) { endTour(true); return; }
+      const wp = TOUR[tourIdx];
+      // blocked() already answers "is there geometry between here and there" — far better than
+      // guessing from leg length, which would dim clear walks and miss short ones through a wall.
+      const lx = wp.pos[0] - player.x, lz = wp.pos[1] - player.z;
+      tourLeg = Math.hypot(lx, lz);
+      tourCut = (tourLeg > 1.5 && blocked(player.x, player.z, lx, lz, tourLeg)) ? 1 : 0;
+      for (const p of PANELS) closePanel(p);
+      if (wp.panel) { openPanel(PANELS[0]); panelView(wp.panel); }
+      else if (wp.roomPanel) openPanel(PANELS[1]);
+      if (wp.on) wp.on();
+      tourTxt.innerHTML = '<b>' + wp.title + ' · ' + (tourIdx + 1) + ' of ' + TOUR.length + '</b>' + wp.text;
+      tourPhase = 'move'; tourT = 0;
+    }
+    function updateTour(dt) {
+      if (!touring || tourPhase === 'idle') return;
+      const wp = TOUR[tourIdx];
+      const lx = wp.look[0] - player.x, lz = wp.look[1] - player.z;
+      const wantYaw = Math.atan2(-lx, -lz);
+      let dy = ((wantYaw - player.yaw + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+      const k = 1 - Math.exp(-dt * 3.0);
+      player.yaw += dy * k; player.pitch += ((wp.pitch || 0) - player.pitch) * k;   // stops may tilt (ceiling devices)
+      const dx = wp.pos[0] - player.x, dz = wp.pos[1] - player.z, dist = Math.hypot(dx, dz);
+      if (tourPhase === 'move') {
+        const prog = tourLeg > 1e-3 ? 1 - Math.min(1, dist / tourLeg) : 1;
+        tourFade.style.opacity = (tourCut * Math.sin(prog * Math.PI) * 0.88).toFixed(3);
+        if (dist > 0.05) { const step = Math.min(dist, 1.7 * dt); player.x += dx / dist * step; player.z += dz / dist * step; }
+        else { tourPhase = 'hold'; tourT = 0; tourFade.style.opacity = '0'; }
+      } else if ((tourT += dt * 1000) >= wp.hold) nextTourStop();
+    }
+    $('tour-btn').addEventListener('click', startTour);
+    tourSkip.addEventListener('click', () => endTour(false));
+
+    // ---- add a device: Matter commissioning ----
+    // Answers the question every installer gets asked — how hard is this to set up? The lamp is a
+    // real object in the room that does not exist until it is paired, so the payoff is visible
+    // rather than a row appearing in a list. Position measured: bare floor, 2.4 m of headroom, and
+    // in line of sight from where the tour stands in the living room, and tucked back towards the
+    // TV wall rather than out in the walkway, where a 1.4 m shade sits right at eye level.
+    const LAMP_POS = new THREE.Vector3(-0.55, 0, -2.70);
+    const LAMP_WATT = 42;
+    let lampAdded = false, lampOn = false, lampGlow = 0;
+
+    const floorLamp = new THREE.Group();
+    floorLamp.position.set(LAMP_POS.x, FLOOR_Y, LAMP_POS.z);
+    floorLamp.visible = false;
+    {
+      const metal = new THREE.MeshBasicMaterial({ color: 0x3a4048 });
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.19, 0.03, 24), metal);
+      base.position.y = 0.015; floorLamp.add(base);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.32, 12), metal);
+      pole.position.y = 0.68; floorLamp.add(pole);
+    }
+    // the shade is its own light source here: the model's lighting is baked, so a real lamp would
+    // change nothing — brightening the shade and a soft halo is what reads as "on"
+    const lampShadeMat = new THREE.MeshBasicMaterial({ color: 0x6d6658, side: THREE.DoubleSide });
+    const lampShade = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.21, 0.25, 24, 1, true), lampShadeMat);
+    lampShade.position.y = 1.42; floorLamp.add(lampShade);
+    // A flat additive plane reads as a grey rectangle against a pale wall — the glow needs a
+    // radial falloff to look like light rather than geometry.
+    function haloTex() {
+      const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+      const g = cv.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+      gr.addColorStop(0, 'rgba(255,224,176,1)');
+      gr.addColorStop(0.35, 'rgba(255,208,150,0.42)');
+      gr.addColorStop(1, 'rgba(255,196,130,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(cv);
+    }
+    const lampHalo = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.0),
+      new THREE.MeshBasicMaterial({ map: haloTex(), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+    lampHalo.position.y = 1.42; lampHalo.renderOrder = 998; floorLamp.add(lampHalo);
+    scene.add(floorLamp);
+
+    const LAMP_OFF_COL = new THREE.Color(0x6d6658), LAMP_ON_COL = new THREE.Color(0xfff0cc);
+    function updateLamp(dt) {
+      const want = (lampAdded && lampOn) ? 1 : 0;
+      lampGlow += (want - lampGlow) * (1 - Math.exp(-dt * 6));
+      lampShadeMat.color.copy(LAMP_OFF_COL).lerp(LAMP_ON_COL, lampGlow);
+      lampHalo.material.opacity = lampGlow * 0.85;
+      lampHalo.visible = lampGlow > 0.01;
+      lampHalo.quaternion.copy(camera.quaternion);            // billboard the halo
+    }
+    $('sw-floorlamp').addEventListener('click', () => {
+      lampOn = !$('sw-floorlamp').classList.contains('on');
+      setSw('sw-floorlamp', lampOn);
+      toast(lampOn ? 'Floor lamp on' : 'Floor lamp off');
+      for (const b of document.querySelectorAll('#panel .scene')) b.classList.remove('active');
+    });
+
+    // ---- balcony: outdoor light + a contact sensor on the slider ----
+    // Measured: the exterior wall face beside and above the door is at x -4.689, and there is a
+    // plain band of it from y 2.25 to 2.68 directly over the opening (below that is the frame
+    // reveal at -4.547, above it is open sky). A wall lantern goes there — you walk out under it.
+    const BAL_WATT = 12;
+    let balconyLightOn = false, balconyGlow = 0;
+    const balconyLight = new THREE.Group();
+    balconyLight.position.set(-4.689, 2.42, 1.00);
+    {
+      const metal = new THREE.MeshBasicMaterial({ color: 0x2f343b });
+      const plate = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.20, 0.15), metal);
+      plate.position.x = -0.014; balconyLight.add(plate);
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.028, 0.028), metal);
+      arm.position.x = -0.069; balconyLight.add(arm);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.048, 0.018, 16), metal);
+      cap.position.set(-0.131, -0.009, 0); balconyLight.add(cap);
+    }
+    // As with the floor lamp, the model's lighting is baked, so a real light would change nothing:
+    // brightening the lantern and floating a halo is what reads as "on".
+    const BAL_OFF_COL = new THREE.Color(0x5c5a53), BAL_ON_COL = new THREE.Color(0xffeec4);
+    const balShadeMat = new THREE.MeshBasicMaterial({ color: 0x5c5a53, side: THREE.DoubleSide });
+    const balShade = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.075, 0.14, 16, 1, true), balShadeMat);
+    balShade.position.set(-0.131, -0.088, 0); balconyLight.add(balShade);
+    const balLens = new THREE.Mesh(new THREE.CircleGeometry(0.072, 16), balShadeMat);
+    balLens.rotation.x = Math.PI / 2; balLens.position.set(-0.131, -0.158, 0); balconyLight.add(balLens);
+    // Queued after the veil and the tint (998/999) so the glow survives lights-off, but before the
+    // sky (1002) — the sky then masks the part that spills past the wall into open air, which is
+    // what stops the halo reading as a smudge floating in the dusk.
+    const balHalo = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 0.85),
+      new THREE.MeshBasicMaterial({ map: haloTex(), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+    balHalo.position.set(-0.14, -0.14, 0); balHalo.renderOrder = 1000; balconyLight.add(balHalo);
+    scene.add(balconyLight);
+
+    // contact pair on the slider: fixed half on the jamb, magnet on the leaf. Both sit on the room
+    // side at x -4.395, just proud of the frame at -4.41.
+    const balContactFrame = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.075, 0.022),
+      new THREE.MeshBasicMaterial({ color: SENSOR_WHITE }));
+    balContactFrame.position.set(-4.395, 1.52, 0.255); scene.add(balContactFrame);
+    const balContactMagnet = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.06, 0.018),
+      new THREE.MeshBasicMaterial({ color: SENSOR_WHITE }));
+    balContactMagnet.position.set(0.065, 1.378, -SLIDE_W / 2 + 0.045);
+    slider.add(balContactMagnet);                       // rides the leaf, so the pair separates
+    const balContactLed = new THREE.Mesh(new THREE.CircleGeometry(0.006, 12), ledMat());
+    balContactLed.rotation.y = Math.PI / 2;             // faces into the room
+    balContactLed.position.set(-4.390, 1.565, 0.255);
+    balContactLed.renderOrder = 1005; scene.add(balContactLed);
+
+    let balconyContact = false, balContactWas = false;
+    function setBalconyLight(on, say) {
+      balconyLightOn = on; setSw('sw-balconylight', on);
+      if (say) toast(on ? 'Balcony light on' : 'Balcony light off');
+    }
+    function updateBalconyLight(dt) {
+      balconyContact = slideNow > 0.06;
+      if (balconyContact !== balContactWas) {
+        // The sensor is what drives the light — so it fires however the door was opened: panel,
+        // voice, a scene or the tour.
+        if (autoOn('balconylight')) {
+          setBalconyLight(balconyContact, false);
+          autoFired('balconylight');
+          toast(balconyContact ? 'Balcony door open — light on' : 'Balcony door closed — light off');
+        }
+        balContactWas = balconyContact;
+        drawScreens();
+      }
+      balContactLed.material.color.setHex(balconyContact ? LED_ALERT : LED_OK);
+      const want = balconyLightOn ? 1 : 0;
+      balconyGlow += (want - balconyGlow) * (1 - Math.exp(-dt * 6));
+      balShadeMat.color.copy(BAL_OFF_COL).lerp(BAL_ON_COL, balconyGlow);
+      balHalo.material.opacity = balconyGlow * 0.9;
+      balHalo.visible = balconyGlow > 0.01;
+      balHalo.quaternion.copy(camera.quaternion);
+    }
+    $('sw-balconylight').addEventListener('click', () => {
+      setBalconyLight(!$('sw-balconylight').classList.contains('on'), true);
+      for (const b of document.querySelectorAll('#panel .scene')) b.classList.remove('active');
+    });
+
+    // A Matter setup code is 11 digits, shown 4-3-4. The QR is drawn to look like the real thing
+    // but is decorative — it is not a scannable Matter onboarding payload.
+    const PAIR_CODE = '3497-011-2332';
+    function drawFakeQR(cv) {
+      const g = cv.getContext('2d'), N = 25, s = cv.width / N;
+      g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height);
+      g.fillStyle = '#0b1220';
+      let seed = 20250911;
+      const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const finder = (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9);
+        if (finder) continue;
+        if (rnd() > 0.55) g.fillRect(x * s, y * s, s, s);
+      }
+      for (const [ox, oy] of [[0, 0], [N - 7, 0], [0, N - 7]]) {
+        g.fillStyle = '#0b1220'; g.fillRect(ox * s, oy * s, 7 * s, 7 * s);
+        g.fillStyle = '#fff'; g.fillRect((ox + 1) * s, (oy + 1) * s, 5 * s, 5 * s);
+        g.fillStyle = '#0b1220'; g.fillRect((ox + 2) * s, (oy + 2) * s, 3 * s, 3 * s);
+      }
+    }
+
+    const COMMISSION_STEPS = [
+      'Device found — Ishara Smart Living Floor Lamp',
+      'Commissioning over Bluetooth LE',
+      'Joining the Thread network',
+      'Operational certificate issued',
+      'Assigned to Living room',
+    ];
+    const addBody = $('add-body');
+    let addTimers = [];
+    function addClearTimers() { addTimers.forEach(clearTimeout); addTimers = []; }
+
+    function addRender(state, step) {
+      addClearTimers();
+      if (state === 'idle') {
+        addBody.innerHTML = '<p>Every device here joined the same way. Scan the code on the device '
+          + 'and it commissions itself onto the fabric — no app-hopping, no hub per brand.</p>'
+          + '<button class="go" id="add-start">Scan a device</button>';
+        $('add-start').addEventListener('click', () => addRender('scan'));
+        return;
+      }
+      if (state === 'scan') {
+        addBody.innerHTML = '<canvas class="qr" width="180" height="180"></canvas>'
+          + '<div class="code">' + PAIR_CODE + '</div>'
+          + '<div class="codelabel">Matter setup code</div>'
+          + '<button class="go" id="add-pair">Pair this device</button>';
+        drawFakeQR(addBody.querySelector('canvas'));
+        $('add-pair').addEventListener('click', () => addRender('pair', 0));
+        return;
+      }
+      if (state === 'pair') {
+        addBody.innerHTML = COMMISSION_STEPS.map((t, i) =>
+          '<div class="step ' + (i < step ? 'done' : i === step ? 'on' : '') + '"><i>'
+          + (i < step ? '✓' : '') + '</i>' + t + '</div>').join('');
+        if (step < COMMISSION_STEPS.length) {
+          addTimers.push(setTimeout(() => addRender('pair', step + 1), step === 0 ? 700 : 620));
+        } else {
+          addTimers.push(setTimeout(() => { commissionLamp(); addRender('done'); }, 450));
+        }
+        return;
+      }
+      addBody.innerHTML = '<div class="ok"><b>Floor lamp added</b>Living room · on the fabric</div>'
+        + '<button class="go" id="add-use">Turn it on</button>'
+        + '<div style="height:8px"></div>'
+        + '<button class="go ghost" id="add-undo">Remove device</button>';
+      $('add-use').addEventListener('click', () => { if (!lampOn) $('sw-floorlamp').click(); panelView('main'); });
+      $('add-undo').addEventListener('click', () => { decommissionLamp(); addRender('idle'); });
+    }
+
+    function commissionLamp() {
+      lampAdded = true; floorLamp.visible = true;
+      $('row-floorlamp').hidden = false;
+      $('add-hint').textContent = '1 added';
+      toast('Floor lamp commissioned — Living room');
+      drawScreens();
+    }
+    function decommissionLamp() {
+      lampAdded = false; lampOn = false; floorLamp.visible = false;
+      setSw('sw-floorlamp', false);
+      $('row-floorlamp').hidden = true;
+      $('add-hint').textContent = 'Matter';
+      toast('Floor lamp removed');
+      drawScreens();
+    }
+    addRender('idle');
+
+    // ---- automations panel ----
+    const autoBody = () => $('auto-rows');
+    function agoText(t) {
+      if (!t) return 'Has not run yet';
+      const s = Math.round((Date.now() - t) / 1000);
+      if (s < 3) return 'Ran just now';
+      if (s < 60) return 'Ran ' + s + 's ago';
+      return 'Ran ' + Math.round(s / 60) + 'm ago';
+    }
+    function buildAutomations() {
+      const body = autoBody(); if (!body || body.children.length) return;
+      for (const a of AUTOMATIONS) {
+        const d = document.createElement('div'); d.className = 'rule';
+        d.innerHTML = '<div class="rh"><span class="rn"></span><div class="sw" data-auto="'
+          + a.id + '"></div></div><div class="rw"><b>When</b> <span class="w"></span></div>'
+          + '<div class="rw"><b>Then</b> <span class="t"></span></div><div class="rl"></div>';
+        d.querySelector('.rn').textContent = a.name;
+        d.querySelector('.w').textContent = a.when;
+        d.querySelector('.t').textContent = a.then;
+        d.querySelector('.sw').addEventListener('click', () => {
+          a.on = !a.on;
+          toast(a.name + (a.on ? ' enabled' : ' disabled'));
+          updateAutomations();
+        });
+        body.appendChild(d);
+      }
+    }
+    function updateAutomations() {
+      buildAutomations();
+      const body = autoBody(); if (!body) return;
+      AUTOMATIONS.forEach((a, i) => {
+        const d = body.children[i]; if (!d) return;
+        d.classList.toggle('off', !a.on);
+        d.querySelector('.sw').classList.toggle('on', a.on);
+        const l = d.querySelector('.rl');
+        l.textContent = a.on ? agoText(a.last) : 'Switched off';
+        l.classList.toggle('hot', a.on && a.last > 0 && Date.now() - a.last < 6000);
+      });
+      const n = AUTOMATIONS.filter(a => a.on).length;
+      $('auto-count').textContent = n + ' of ' + AUTOMATIONS.length;
+    }
+
+    // ---- energy ----
+    // Nothing new is measured: every figure below is synthesised from state the house already
+    // tracks, so the numbers move with the lights fading, the curtains running and the hob firing.
+    // Draws are typical European-apartment figures for the kind of kit this demo represents.
+    const WATT = {
+      common: 62, bedroom: 18, bathroom: 14, tv: 95, hob: 2100,
+      curtainMotor: 35, heat: 1400, cool: 900, climateIdle: 6, standby: 7
+    };
+    function moving(target, now) { return Math.abs(target - now) > 0.01; }
+    function energyRows() {
+      const dim = Math.max(0, Math.min(1, 1 - veilNow / 0.85));          // dimmed lights genuinely draw less
+      const climate = climateMode();
+      return [
+        ['Living area lights', WATT.common * dim],
+        ['Bedroom light', WATT.bedroom * ROOMS[0].lit],
+        ['Bathroom light', WATT.bathroom * ROOMS[1].lit],
+        ['TV', WATT.tv * tvNow],
+        ['Hob', hobOn ? WATT.hob : 0],
+        ['Curtain motors', (moving(curtainOpen ? 1 : 0, curtainNow) ? WATT.curtainMotor : 0)
+          + (moving(bedCurtainOpen ? 1 : 0, bedCurtainNow) ? WATT.curtainMotor : 0)],
+        ['Climate · ' + climate, climate === 'Heating' ? WATT.heat : (climate === 'Cooling' ? WATT.cool : WATT.climateIdle)],
+        ['Panels & sensors', WATT.standby],
+        ['Cove strip', stripNow * STRIP_WATT],
+        ['Balcony door', moving(sliderOpen ? 1 : 0, slideNow) ? 30 : 0],
+        ['Balcony light', balconyGlow > 0.5 ? BAL_WATT : 0],
+      ].concat(lampAdded ? [['Floor lamp', lampOn ? LAMP_WATT : 0]] : []);
+    }
+    function fmtW(w) { return w >= 1000 ? (w / 1000).toFixed(2) + ' kW' : Math.round(w) + ' W'; }
+    function updateEnergy() {
+      const energyBody = $('energy-rows'); if (!energyBody) return 0;
+      const rows = energyRows();
+      const total = rows.reduce((a, r) => a + r[1], 0);
+      $('energy-total').textContent = fmtW(total);
+      $('energy-now').textContent = fmtW(total);
+      // Rebuild when the count changes, not just when empty: commissioning a device adds a row,
+      // and reusing a shorter list walked off the end of the children.
+      if (energyBody.children.length !== rows.length) {
+        energyBody.innerHTML = '';
+        for (const r of rows) {
+          const d = document.createElement('div'); d.className = 'ctl';
+          d.innerHTML = '<span class="nm"></span><span class="ro"></span>'; energyBody.appendChild(d);
+        }
+      }
+      rows.forEach((r, i) => {
+        const d = energyBody.children[i];
+        d.querySelector('.nm').textContent = r[0];
+        const v = d.querySelector('.ro'); v.textContent = fmtW(r[1]);
+        v.classList.toggle('live', r[1] >= 1);
+      });
+      return total;
+    }
+
+    // ---- live screen on the wall panel ----
+    // The panel showed a product photo; draw the real device UI to a canvas instead so it
+    // reflects live state (clock, lights, doors, room presence).
+    const panelCv = document.createElement('canvas'); panelCv.width = 512; panelCv.height = 310;
+    const pctx = panelCv.getContext('2d');
+    const panelUI = new THREE.CanvasTexture(panelCv); panelUI.encoding = THREE.sRGBEncoding;
+    panelScreen.material.map = panelUI; panelScreen.material.needsUpdate = true;
+    function rr(g, x, y, w, h, r) { g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); g.fill(); }
+    function drawPanelScreen() {
+      const g = pctx, W = panelCv.width, H = panelCv.height;
+      g.fillStyle = '#0b1220'; g.fillRect(0, 0, W, H);
+      const now = new Date();
+      g.textBaseline = 'top'; g.textAlign = 'left';
+      g.fillStyle = '#eaf1fb'; g.font = '600 52px Inter,system-ui,sans-serif';
+      g.fillText(String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'), 26, 18);
+      g.fillStyle = '#7f97b4'; g.font = '500 17px Inter,system-ui,sans-serif';
+      g.fillText(now.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }), 28, 76);
+      g.textAlign = 'right';
+      if (brandOk) { const bh = 24, bw = bh * brandImg.width / brandImg.height; g.drawImage(brandImg, W - 26 - bw, 17, bw, bh); }
+      else { g.fillStyle = '#3B9CF0'; g.font = '700 19px Poppins,Inter,sans-serif'; g.fillText('Ishara', W - 26, 22); }
+      g.fillStyle = '#61758c'; g.font = '500 14px Inter,system-ui,sans-serif';
+      g.fillText(tempSet.toFixed(1) + '° · ' + climateMode(), W - 26, 50);
+      g.fillStyle = '#7cc0ff'; g.font = '600 15px Inter,system-ui,sans-serif';
+      g.fillText(fmtW(updateEnergy()), W - 26, 70);
+      g.textAlign = 'left';
+      const tiles = [
+        ['Lights', $('sw-lights').classList.contains('on'), 'On', 'Off'],
+        ['Front door', !$('sw-lock').classList.contains('on'), 'Unlocked', 'Locked'],
+        ['Bedroom', ROOMS[0].lit > 0.5, 'On', 'Off'],
+        ['Bathroom', ROOMS[1].lit > 0.5, 'On', 'Off'],
+        ['TV', tvOn, 'On', 'Off'],
+        ['Curtains', curtainOpen, 'Open', 'Closed'],
+      ];
+      const tw = (W - 52 - 20) / 3, th = 66;
+      tiles.forEach((t, i) => {
+        const x = 26 + (i % 3) * (tw + 10), y = 104 + Math.floor(i / 3) * (th + 10);
+        g.fillStyle = t[1] ? 'rgba(59,156,240,.16)' : 'rgba(255,255,255,.05)';
+        rr(g, x, y, tw, th, 13);
+        g.fillStyle = '#cfe0f5'; g.font = '600 14px Inter,system-ui,sans-serif'; g.fillText(t[0], x + 12, y + 10);
+        g.fillStyle = t[1] ? '#7cc0ff' : '#61758c'; g.font = '500 12px Inter,system-ui,sans-serif';
+        g.fillText(t[1] ? t[2] : t[3], x + 12, y + 30);
+        g.fillStyle = t[1] ? '#3B9CF0' : 'rgba(255,255,255,.18)';
+        g.beginPath(); g.arc(x + tw - 16, y + 18, 5, 0, Math.PI * 2); g.fill();
+      });
+      // Two contact sensors now, and the chip row is a fixed three columns — so the chip counts
+      // rather than gaining a fourth column that would run off the screen.
+      const nOpen = (contactOpen ? 1 : 0) + (balconyContact ? 1 : 0);
+      const chips = [['Contact', nOpen ? (nOpen > 1 ? nOpen + ' open' : 'Open') : 'Closed', nOpen > 0],
+      ['Leak', leakAlert ? (leakValve ? 'VALVE SHUT' : 'ALERT') : 'Dry', leakAlert],
+      ['Smoke', smokeAlarm ? 'ALARM' : 'OK', smokeAlarm]];
+      chips.forEach((c, i) => {
+        const x = 26 + i * (tw + 10), y = 104 + 2 * (th + 10);
+        g.fillStyle = 'rgba(255,255,255,.045)'; rr(g, x, y, tw, 34, 10);
+        g.fillStyle = c[2] ? '#ffb4b4' : '#61758c'; g.font = '600 12px Inter,system-ui,sans-serif';
+        g.fillText(c[0], x + 12, y + 11);
+        g.textAlign = 'right'; g.fillStyle = c[2] ? '#e05555' : '#8fa6bd';
+        g.fillText(c[1], x + tw - 12, y + 11); g.textAlign = 'left';
+      });
+      panelUI.needsUpdate = true;
+    }
+
+    // ---- live screen on the bedroom panel ----
+    // Square canvas for a square panel: just the two things this panel controls.
+    const bedCv = document.createElement('canvas'); bedCv.width = bedCv.height = 360;
+    const bctx = bedCv.getContext('2d');
+    const bedUI = new THREE.CanvasTexture(bedCv); bedUI.encoding = THREE.sRGBEncoding;
+    bedScreen.material.map = bedUI; bedScreen.material.needsUpdate = true;
+    function drawBedPanel() {
+      const g = bctx, W = bedCv.width;
+      g.fillStyle = '#0b1220'; g.fillRect(0, 0, W, W);
+      g.textBaseline = 'top'; g.textAlign = 'left';
+      if (brandOk) { const bh = 17, bw = bh * brandImg.width / brandImg.height; g.drawImage(brandImg, 24, 22, bw, bh); }
+      else { g.fillStyle = '#3B9CF0'; g.font = '700 15px Poppins,Inter,sans-serif'; g.fillText('Ishara', 24, 23); }
+      g.fillStyle = '#eaf1fb'; g.font = '600 30px Poppins,Inter,sans-serif'; g.fillText('Bedroom', 24, 58);
+      const tiles = [['Light', ROOMS[0].lit > 0.5, 'On', 'Off'],
+      ['Curtains', bedCurtainOpen, 'Open', 'Closed']];
+      tiles.forEach((t, i) => {
+        const x = 24, y = 118 + i * 106, w = W - 48, h = 90;
+        g.fillStyle = t[1] ? 'rgba(59,156,240,.16)' : 'rgba(255,255,255,.05)';
+        rr(g, x, y, w, h, 16);
+        g.fillStyle = '#cfe0f5'; g.font = '600 21px Inter,system-ui,sans-serif'; g.fillText(t[0], x + 18, y + 18);
+        g.fillStyle = t[1] ? '#7cc0ff' : '#61758c'; g.font = '500 17px Inter,system-ui,sans-serif';
+        g.fillText(t[1] ? t[2] : t[3], x + 18, y + 48);
+        g.fillStyle = t[1] ? '#3B9CF0' : 'rgba(255,255,255,.18)';
+        g.beginPath(); g.arc(x + w - 26, y + 28, 8, 0, Math.PI * 2); g.fill();
+      });
+      bedUI.needsUpdate = true;
+    }
+    function drawScreens() { drawPanelScreen(); drawBedPanel(); updateAutomations(); }
+    drawScreens(); setInterval(drawScreens, 500);
+
+    // ---- scenes ----
+    const SCENES = {
+      morning: {
+        label: 'Good morning', lights: true, level: 1, lightTemp: 5,      // daylight, full
+        strip: false, lamp: false, slider: true,
+        front: true, bed: false, bath: true, rooms: { bedroom: true, bathroom: null },
+        tv: false, curtain: true, bedCurtain: true, temp: 21.5
+      },
+      movie: {
+        // Lights stay ON but right down and warm, so the room glows rather than going flat dark,
+        // and the cove strip picks up the blue of the screen.
+        label: 'Movie night', lights: true, level: 0.1, lightTemp: 1,     // warm, 10%
+        strip: true, stripColour: 0x3b7bff, lamp: true, slider: true,
+        front: true, bed: true, bath: true, rooms: { bedroom: false, bathroom: false },
+        tv: true, curtain: false, bedCurtain: false, temp: 22.0
+      },
+      away: {
+        label: 'Leaving home', lights: false, level: 1, lightTemp: 3,
+        strip: false, lamp: false, slider: true, balconyLight: false,
+        front: true, bed: true, bath: true, rooms: { bedroom: false, bathroom: false },
+        tv: false, curtain: false, bedCurtain: false, temp: 17.0, hob: false
+      },
+    };
+    function setSw(id, on) { const el = $(id); if (el) el.classList.toggle('on', on); }
+    function applyScene(key) {
+      const sc = SCENES[key]; if (!sc) return;
+      setSw('sw-lights', sc.lights);
+      if (sc.lightTemp !== undefined) setLightTemp(sc.lightTemp);
+      if (sc.level !== undefined) setLightLevel(sc.level);
+      // setLightLevel only touches the veil when the lights are on, so set the off case here
+      veilTarget = sc.lights ? (1 - lightLevel) * 0.85 : 0.93;
+      // drive the strip directly rather than through setStrip(), which would toast over the
+      // scene's own toast and clear the highlight we are about to set
+      if (sc.stripColour !== undefined) { stripCycle = false; stripColour.setHex(sc.stripColour); }
+      if (sc.strip !== undefined) stripOn = !!sc.strip;
+      paintStripView();
+      if (sc.lamp !== undefined && lampAdded) { lampOn = !!sc.lamp; setSw('sw-floorlamp', lampOn); }
+      if (sc.slider !== undefined) { sliderOpen = !sc.slider; setSw('sw-slider', sc.slider); }  // scene value = shut
+      if (sc.balconyLight !== undefined) setBalconyLight(!!sc.balconyLight, false);
+      setSw('sw-lock', sc.front); applyDoorFromToggle(false);              // 'on' = locked = shut
+      setSw('sw-bed', sc.bed); applyExtraFromToggle(EXTRA_DOORS[0], false);
+      setSw('sw-bath', sc.bath); applyExtraFromToggle(EXTRA_DOORS[1], false);
+      setSw('sw-tv', sc.tv); applyTv(sc.tv, false);
+      setSw('sw-curtain', sc.curtain); applyCurtain(sc.curtain, false);
+      applyBedCurtain(sc.bedCurtain, false);
+      if (sc.temp !== undefined) setTemp(sc.temp);
+      if (sc.hob === false) { setSw('sw-hob', false); setHob(false); }
+      for (const r of ROOMS) r.manual = (sc.rooms && sc.rooms[r.id] !== undefined) ? sc.rooms[r.id] : null;
+      for (const b of document.querySelectorAll('#panel .scene')) b.classList.toggle('active', b.dataset.scene === key);
+      toast(sc.label);
+      drawScreens();
+    }
+    for (const b of document.querySelectorAll('#panel .scene')) b.addEventListener('click', () => applyScene(b.dataset.scene));
+    // any manual switch drops the active-scene highlight
+    for (const id of ['sw-lights', 'sw-lock', 'sw-bed', 'sw-bath', 'sw-tv', 'sw-curtain']) {
+      const el = $(id); if (el) el.addEventListener('click', () => {
+        for (const b of document.querySelectorAll('#panel .scene')) b.classList.remove('active');
+      });
+    }
+
+    // ---- room groups on the house panel ----
+    // One row per room instead of a light row and a door row. The toggle drives everything in that
+    // room; tapping the name drills into the room's own devices. The row mirrors the room light,
+    // which is the part presence already moves on its own (see ROOMS.swIds).
+    const GROUPS = [
+      { room: 'bedroom', sw: 'sw-grp-bedroom', door: EXTRA_DOORS[0], curtains: true },
+      { room: 'bathroom', sw: 'sw-grp-bathroom', door: EXTRA_DOORS[1], curtains: false },
+    ];
+    for (const el of document.querySelectorAll('#panel .grp[data-goto] .nm'))
+      el.addEventListener('click', () => panelView(el.closest('.grp').dataset.goto));
+    for (const g of GROUPS) {
+      const el = $(g.sw); if (!el) continue;
+      el.addEventListener('click', () => {
+        // the ROOMS handler above already took the light from this same click; do the rest
+        const on = !el.classList.contains('on');
+        if (g.curtains) applyBedCurtain(on, false);
+        setSw(g.door.swId, on); applyExtraFromToggle(g.door, false);     // 'on' = shut, as elsewhere
+        toast(g.door.label.replace(' door', '') + (on ? ' on' : ' off'));
+      });
+    }
+    for (const b of document.querySelectorAll('#panel .back')) b.addEventListener('click', () => panelView('main'));
+
+    // K: aim at the front door and press to identify it, log its bbox, and swing it open.
+    function pickDoorAtAim() {
+      if (!world) { console.warn('[door] model not loaded yet'); return; }
+      camera.getWorldDirection(_dir); _dir.normalize();
+      _aimRay.set(camera.position, _dir); _aimRay.far = 8;
+      const hits = _aimRay.intersectObjects(doorPivot ? [world, doorPivot] : [world], true);
+      if (!hits.length) { toast('Nothing in view — aim at the door'); console.warn('[door] no hit within 8m'); return; }
+      const info = rigDoor(hits[0].object);
+      const f = v => Number(v.toFixed(3));
+      console.log('[door] DOOR_CENTER = new THREE.Vector3(' + f(info.center.x) + ', ' + f(info.center.y) + ', ' + f(info.center.z) + ');');
+      console.log('[door] SIZE = (' + f(info.size.x) + ', ' + f(info.size.y) + ', ' + f(info.size.z) + ')  widthAxis=' + info.widthAxis + '  meshes=' + info.count + '  HINGE_SIDE=' + HINGE_SIDE + '  SWING_SIGN=' + SWING_SIGN);
+      doorTarget = OPEN_ANGLE * SWING_SIGN;                       // swing it so the pick can be judged
+      toast('Door picked — see console');
+    }
+
+
+    // ---- double-click / double-tap: toggle what you point at, or walk to the floor spot ----
+    const _tapRay = new THREE.Raycaster(), _ndc = new THREE.Vector2();
+    let walkTo = null;
+    const under = (o, root) => { for (; o; o = o.parent) if (o === root) return true; return false; };
+    function doubleAt(cx, cy) {
+      if (!playing || !world || touring) return;
+      const r = canvas.getBoundingClientRect();
+      _ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+      _tapRay.setFromCamera(_ndc, camera); _tapRay.far = 12;
+      const targets = [world, slider, tvScreen, ...curtains.leaves.map(c => c.mesh), ...bedCurtains.leaves.map(c => c.mesh)];
+      if (doorPivot) targets.push(doorPivot);
+      for (const d of EXTRA_DOORS) if (d.pivot) targets.push(d.pivot);
+      const hit = _tapRay.intersectObjects(targets, true)[0];
+      if (!hit) return;
+      const o = hit.object, p = hit.point;
+      const click = id => $(id).click();
+      if (doorPivot && under(o, doorPivot)) return click('sw-lock');
+      for (const d of EXTRA_DOORS) if (d.pivot && under(o, d.pivot)) return click(d.swId);
+      if (under(o, slider)) return click('sw-slider');
+      if (curtains.leaves.some(c => c.mesh === o)) return click('sw-curtain');
+      if (bedCurtains.leaves.some(c => c.mesh === o)) return click('sw-bedcurtain');
+      if (o === tvScreen || (Math.abs(p.z - TV_POS.z) < 0.2 && Math.abs(p.x - TV_POS.x) < TV_W / 2 && Math.abs(p.y - TV_POS.y) < TV_H / 2)) return click('sw-tv');
+      if (o === glassMesh && Math.abs(p.x - SLIDE_X) < 0.4 && p.z > SLIDE_Z0 && p.z < SLIDE_Z1 && p.y < FLOOR_Y + 2.0) return click('sw-slider');   // glass in the slider bay
+      if (o === glassMesh && Math.abs(p.x - CUR_X) < 0.4 && p.z > CUR_Z0 && p.z < CUR_Z1) return click('sw-curtain');   // window behind open curtains
+      if (o === glassMesh && Math.abs(p.x - BCUR_X) < 0.4) return click('sw-bedcurtain');
+      _nmat.getNormalMatrix(o.matrixWorld);
+      if (hit.face && _nrm.copy(hit.face.normal).applyMatrix3(_nmat).normalize().y > 0.7 && p.y < FLOOR_Y + 0.3) {
+        walkTo = { x: p.x, z: p.z }; toast('Walking there…');
+      }
+    }
+    canvas.addEventListener('dblclick', e => { if (!isTouch) doubleAt(e.clientX, e.clientY); });
+
+    // ---- voice control ----
+    // Browser speech recognition wired to the switches that already exist: every command ends in a
+    // click() on a real control, so scenes, toasts, panel screens and the energy figures all update
+    // through exactly the same paths as a tap. Nothing here is a second source of truth.
+    // Needs a secure context (https, or localhost) and, inside an iframe, allow="microphone".
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const micBtn = $('mic'), voiceBox = $('voice'), voiceState = $('voice-state'), voiceSaid = $('voice-said');
+    let rec = null, listening = false, voiceHideT = null;
+
+    function voiceShow(state, said, dim) {
+      voiceState.textContent = state;
+      voiceSaid.textContent = said || '';
+      voiceSaid.className = dim ? 'dim' : '';
+      voiceBox.classList.add('on');
+      clearTimeout(voiceHideT);
+      if (!listening) voiceHideT = setTimeout(() => voiceBox.classList.remove('on'), 3200);
+    }
+    function speak(t) {
+      try {
+        if (!window.speechSynthesis) return;
+        const u = new SpeechSynthesisUtterance(t); u.lang = 'en-GB'; u.rate = 1.06;
+        speechSynthesis.cancel(); speechSynthesis.speak(u);
+      } catch (e) { }
+    }
+
+    // Drive the UI rather than the state: flipping the switch runs every handler already attached.
+    function voiceSet(id, on) {
+      for (const one of (Array.isArray(id) ? id : [id])) {
+        const el = $(one);
+        if (el && el.classList.contains('on') !== on) el.click();
+      }
+    }
+    const WANT_ON = /\b(on|open|up|unlock|start|raise|draw back)\b/;
+    const WANT_OFF = /\b(off|close|shut|down|lock|stop|lower|draw)\b/;
+
+    // Room and device are read independently: "bedroom lights off" and "lights off in the bedroom"
+    // are the same instruction, and an earlier grammar that required the room first sent the second
+    // one to the whole-house master.
+    function roomOf(t) {
+      if (/\b(all|every|everything|everywhere|entire|whole house|the house)\b/.test(t)) return 'all';
+      if (/\bbed\s?room\b/.test(t)) return 'bedroom';
+      if (/\b(bath\s?room|shower|toilet)\b/.test(t)) return 'bathroom';
+      if (/\b(living(\s?room)?|lounge|hall(\s?room|way)?|front\s?room|main\s?room)\b/.test(t)) return 'living';
+      if (/\bfront\b/.test(t)) return 'front';
+      return null;                                   // fall back to the device's own default room
+    }
+    // `def` is the room assumed when none is named — "close the curtains" means the ones you can see.
+    const VOICE_DEVICES = [
+      {
+        re: /\b(strip|cove|accent|mood)\s?(light|lighting|lights)?\b/, def: 'living',
+        rooms: { living: { id: 'sw-strip', label: 'Cove strip' } }
+      },
+      {
+        re: /\b(floor|standing|corner)\s?lamp\b/, def: 'living',
+        rooms: { living: { id: 'sw-floorlamp', label: 'Floor lamp' } }
+      },
+      {
+        // must beat both the generic lights rule and the balcony *door* rule below
+        re: /\b(balcony|terrace|patio|outdoor|outside|exterior)\s?(light|lamp|lighting)s?\b/, def: 'living',
+        rooms: { living: { id: 'sw-balconylight', label: 'Balcony light' } }
+      },
+      {
+        re: /\b(light|lamp)s?\b/, def: 'all',
+        rooms: {
+          bedroom: { id: 'sw-bedlight', label: 'Bedroom light' },
+          bathroom: { id: 'sw-bathlight', label: 'Bathroom light' },
+          living: { id: 'sw-lights', label: 'Lights' },
+          all: { id: 'sw-lights', label: 'All lights' },
+        }
+      },
+      {
+        re: /\b(curtain|blind|drape)s?\b/, def: 'living', verbs: ['opened', 'closed'],
+        rooms: {
+          bedroom: { id: 'sw-bedcurtain', label: 'Bedroom curtains' },
+          living: { id: 'sw-curtain', label: 'Living room curtains' },
+          all: { id: ['sw-curtain', 'sw-bedcurtain'], label: 'All curtains' },
+        }
+      },
+      { re: /\b(tv|telly|television)\b/, def: 'living', rooms: { living: { id: 'sw-tv', label: 'TV' } } },
+      // recognition regularly hears the hob as mob, mop or hop — accept the near misses
+      {
+        re: /\b(hob|hop|mob|mop|cob|stove|cooker|cook\s?top|hot\s?plate)\b/, def: 'living',
+        rooms: { living: { id: 'sw-hob', label: 'Hob' } }
+      },
+      {
+        re: /\b(balcony|terrace|patio|slider|sliding)\b/, def: 'living', invert: true,
+        verbs: ['closed', 'opened'],
+        rooms: { living: { id: 'sw-slider', label: 'Balcony door' } }
+      },
+      {
+        re: /\b(door|lock)s?\b/, def: 'front', invert: true, verbs: ['closed', 'opened'],
+        rooms: {
+          bedroom: { id: 'sw-bed', label: 'Bedroom door' },
+          bathroom: { id: 'sw-bath', label: 'Bathroom door' },
+          living: { id: 'sw-lock', label: 'Front door', verbs: ['locked', 'unlocked'] },
+          front: { id: 'sw-lock', label: 'Front door', verbs: ['locked', 'unlocked'] },
+          all: { id: ['sw-lock', 'sw-bed', 'sw-bath'], label: 'Every door' },
+        }
+      },
+    ];
+
+    function runVoice(raw) {
+      // "hey riva ..." — recognition mangles the brand often enough that the wake word is optional
+      const t = raw.toLowerCase().replace(/[.,!?]/g, ' ')
+        .replace(/\b(hey|ok|okay)?\s*(ishara|shara|riva|reva|rita|viva|river)\s*(smart)?\b/g, ' ')
+        .replace(/\s+/g, ' ').trim();
+      if (!t) return null;
+
+      if (/\b(good )?morning\b/.test(t)) { applyScene('morning'); return 'Good morning'; }
+      if (/\bmovie|\bcinema|\bfilm\b/.test(t)) { applyScene('movie'); return 'Movie night'; }
+      if (/\b(leaving|leave|away|going out|goodbye)\b/.test(t)) { applyScene('away'); return 'Leaving home'; }
+      if (/\b(clear|stop|silence|cancel)\b.*\b(alarm|alert)\b/.test(t)) { clearAlarm(false); return 'Alarm cleared'; }
+      if (/\b(tour|show me around)\b/.test(t)) { startTour(); return 'Starting the tour'; }
+      // "test the smoke sensor", "simulate a leak" — press the panel's own test buttons
+      // "make the strip blue", "rainbow" — colour words only count alongside the strip
+      if (/\b(strip|cove|accent|mood)\b/.test(t) || /\brainbow\b/.test(t)) {
+        if (/\b(rainbow|cycle|cycling|party|disco)\b/.test(t)) {
+          stripCycle = true; if (!stripOn) setStrip(true); paintStripView(); return 'Cove strip cycling';
+        }
+        for (const [name, hex] of STRIP_COLOURS) {
+          if (new RegExp('\\b' + name.toLowerCase() + '\\b').test(t)) {
+            setStripColour(hex); if (!stripOn) setStrip(true); return 'Cove strip ' + name.toLowerCase();
+          }
+        }
+      }
+      // dimming and colour temperature, e.g. "dim the lights to 40 percent", "lights warmer"
+      if (/\b(light|lamp)s?\b/.test(t) || /\b(dim|brighter|dimmer)\b/.test(t)) {
+        const pct = t.match(/\b(\d{1,3})\s*(?:%|percent)\b/);
+        if (pct) { setLightLevel(Number(pct[1]) / 100); return 'Lights at ' + Math.round(lightLevel * 100) + '%'; }
+        if (/\b(dim|dimmer|lower)\b/.test(t) && !/\boff\b/.test(t)) { setLightLevel(lightLevel - 0.2); return 'Lights at ' + Math.round(lightLevel * 100) + '%'; }
+        if (/\b(brighter|brighten)\b/.test(t)) { setLightLevel(lightLevel + 0.2); return 'Lights at ' + Math.round(lightLevel * 100) + '%'; }
+        for (let i = 0; i < LIGHT_TEMPS.length; i++) {
+          if (new RegExp('\\b' + LIGHT_TEMPS[i][0].toLowerCase() + '\\b').test(t)) {
+            setLightTemp(i); return 'Lights ' + LIGHT_TEMPS[i][0].toLowerCase();
+          }
+        }
+        if (/\bwarmer\b/.test(t)) { setLightTemp(lightTempIdx - 1); return 'Lights ' + LIGHT_TEMPS[lightTempIdx][0].toLowerCase(); }
+        if (/\bcooler\b/.test(t)) { setLightTemp(lightTempIdx + 1); return 'Lights ' + LIGHT_TEMPS[lightTempIdx][0].toLowerCase(); }
+      }
+      const isTest = /\b(test|simulate|trigger|demo|try)\b/.test(t);
+      if (isTest && /\b(smoke|fire|alarm)\b/.test(t)) {
+        document.querySelector('#panel .test[data-test="smoke"]').click(); return 'Testing the smoke alarm';
+      }
+      if (isTest && /\b(leak|water|flood)\b/.test(t)) {
+        document.querySelector('#panel .test[data-test="leak"]').click(); return 'Testing the leak sensor';
+      }
+
+      const deg = t.match(/\b(\d{1,2})(?:\s*(?:degrees|degree))?\b/);
+      if (/\b(temperature|thermostat|temp|degrees|warmer|cooler|heating|colder)\b/.test(t)) {
+        if (/\bwarmer|\bhotter|\bwarm up\b/.test(t)) { setTemp(tempSet + 0.5); return 'Setpoint ' + tempSet.toFixed(1) + '°'; }
+        if (/\bcooler|\bcolder|\bcool down\b/.test(t)) { setTemp(tempSet - 0.5); return 'Setpoint ' + tempSet.toFixed(1) + '°'; }
+        if (deg) { setTemp(parseInt(deg[1], 10)); return 'Setpoint ' + tempSet.toFixed(1) + '°'; }
+      }
+
+      const on = WANT_ON.test(t), off = WANT_OFF.test(t);
+      if (on || off) {
+        const room = roomOf(t);
+        for (const d of VOICE_DEVICES) {
+          if (!d.re.test(t)) continue;
+          const target = d.rooms[room] || d.rooms[d.def] || d.rooms[Object.keys(d.rooms)[0]];
+          if (!target) continue;
+          const want = d.invert ? off : on;          // "open the door" = switch off = unlatched
+          voiceSet(target.id, want);
+          const [yes, no] = target.verbs || d.verbs || ['on', 'off'];
+          return target.label + ' ' + (want ? yes : no);
+        }
+      }
+      return null;
+    }
+
+    function handleSpeech(text, final) {
+      if (!final) { voiceShow('Listening…', text, true); return; }
+      const done = runVoice(text);
+      if (done) { voiceShow('Done', done); speak(done); }
+      else { voiceShow('Didn’t catch that', '“' + text + '” — try “movie night” or “lights off”', true); }
+    }
+
+    function stopVoice(quiet) {
+      listening = false; micBtn.classList.remove('on');
+      try { if (rec) { rec.onend = null; rec.stop(); } } catch (e) { }
+      rec = null;
+      if (!quiet) voiceShow('Voice off', 'Press V or tap the mic to talk again', true);
+    }
+    function startVoice() {
+      if (!SR) { voiceShow('Not supported', 'This browser has no speech recognition — try Chrome', true); return; }
+      listening = true; micBtn.classList.add('on');
+      voiceShow('Listening…', 'Try “movie night”, “lights off”, “lock the front door”, “set temperature to 22”', true);
+      rec = new SR();
+      rec.lang = 'en-GB'; rec.continuous = true; rec.interimResults = true;
+      rec.onresult = e => {
+        for (let i = e.resultIndex; i < e.results.length; i++)
+          handleSpeech(e.results[i][0].transcript.trim(), e.results[i].isFinal);
+      };
+      rec.onerror = e => {
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          stopVoice(true);
+          voiceShow('Microphone blocked', 'Allow mic access for this page, then press V again', true);
+        }
+        // 'no-speech' and 'aborted' are routine; onend restarts us
+      };
+      rec.onend = () => { if (listening) { try { rec.start(); } catch (e) { } } };
+      try { rec.start(); } catch (e) { }
+    }
+    function toggleVoice() { listening ? stopVoice(false) : startVoice(); }
+
+    if (!SR) micBtn.title = 'Voice control needs Chrome';
+    micBtn.addEventListener('click', e => { e.stopPropagation(); toggleVoice(); });
+
+    // ---- enter ----
+    $('enter').addEventListener('click', () => {
+      $('gate').classList.add('hide'); app.classList.add('playing'); playing = true; focusApp(); if (!isTouch) { setTimeout(lockP, 60); }
+      veilNow = 0.93; veilTarget = 0; toast('Welcome home — lights on');
+    });
+
+    addEventListener('resize', () => { if (innerHeight < 1 || innerWidth < 1) return; camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+    const clock = new THREE.Clock();
+    let unTick = 0;
+    function frame() {
+      requestAnimationFrame(frame);
+      const dt = Math.min(0.05, clock.getDelta());
+      if (playing && world && !touring) {
+        const spd = (running ? 4.6 : 2.5) * dt;
+        let mF = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0) + (keys.ArrowUp ? 1 : 0) - (keys.ArrowDown ? 1 : 0);
+        let mS = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0);
+        if (isTouch) { mF += -mv.z; mS += mv.x; }
+        if (mF || mS) walkTo = null;                                   // any manual input cancels the auto-walk
+        else if (walkTo) {
+          const dx = walkTo.x - player.x, dz = walkTo.z - player.z;
+          if (Math.hypot(dx, dz) < 0.2) walkTo = null;
+          else {
+            let dy = Math.atan2(-dx, -dz) - player.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+            player.yaw += dy * Math.min(1, dt * 6); if (Math.abs(dy) < 0.6) mF = 1;   // turn first, then walk
+          }
+        }
+        let refused = false;
+        if (mF || mS) {
+          const fx = -Math.sin(player.yaw), fz = -Math.cos(player.yaw), rx = Math.cos(player.yaw), rz = -Math.sin(player.yaw);
+          let vx = rx * mS + fx * mF, vz = rz * mS + fz * mF; const l = Math.hypot(vx, vz) || 1; vx /= l; vz /= l;
+          const stepX = vx * spd, stepZ = vz * spd;
+          if (!blocked(player.x, player.z, stepX, 0, Math.abs(stepX))) player.x += stepX; else refused = true;
+          if (!blocked(player.x, player.z, 0, stepZ, Math.abs(stepZ))) player.z += stepZ; else refused = true;
+        }
+        // Only sweep when it can matter: you are in contact with something, or the periodic tick
+        // catches the rare case of a door closing onto a player who is standing still.
+        unTick++;
+        if (refused) walkTo = null;                                    // ran into something: stop rather than grind
+        if (refused || unTick % 20 === 0) unstick(dt);
+      }
+      veilNow += (veilTarget - veilNow) * 0.08; veil.material.opacity = veilNow; veil.position.set(player.x, player.y, player.z);
+      updateOutdoor();
+      updateLightTint(dt); lightTint.position.set(player.x, player.y, player.z);
+      tAcc += dt; updateWallPanel(tAcc);
+      if (doorPivot) { doorNow += (doorTarget - doorNow) * (1 - Math.exp(-dt * 5.5)); doorPivot.rotation.y = doorNow; }
+      for (const d of EXTRA_DOORS) { if (!d.pivot) continue; d.now += (d.target - d.now) * (1 - Math.exp(-dt * 5.5)); d.pivot.rotation.y = d.rotY + d.now; }
+      updateRooms(dt, tAcc);
+      updateActuators(dt);
+      updateSensors(dt, tAcc);
+      updateClimate(dt);
+      updateHob(dt);
+      updateLamp(dt);
+      updateStrip(dt, tAcc);
+      updateSlider(dt);
+      updateBalconyLight(dt);
+      updateTour(dt);
+      camera.position.set(player.x, player.y, player.z); camera.rotation.y = player.yaw; camera.rotation.x = player.pitch;
+      renderer.render(scene, camera);
+    }
+
+    frame();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1417 @@
+/* ==========================================================================
+   ISHARA SMART LIVING - Flagship Design System & Stylesheet
+   Theme: Luxury Emerald & Champagne Gold on Dark Velvet & Crisp Light
+   ========================================================================== */
+
+:root {
+  --ishara-gold: #cfa856;
+  --ishara-gold-light: #f5dfa2;
+  --ishara-gold-dark: #99752b;
+  --ishara-gold-glow: rgba(207, 168, 86, 0.35);
+  
+  --ishara-emerald: #1e7e48;
+  --ishara-emerald-light: #34c776;
+  --ishara-emerald-dark: #0f4d2a;
+  --ishara-emerald-glow: rgba(30, 126, 72, 0.3);
+
+  --ishara-dark-bg: #0b0f17;
+  --ishara-dark-card: #141c28;
+  --ishara-dark-border: rgba(207, 168, 86, 0.22);
+  
+  --ishara-ink: #111827;
+  --ishara-ink-soft: #4b5563;
+  --ishara-ink-muted: #9ca3af;
+  --ishara-light-bg: #f9fbf9;
+  --ishara-light-card: #ffffff;
+  
+  --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+}
+
+/* Base resets & typography */
+html {
+  scroll-behavior: smooth;
+  color-scheme: light dark;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: #0b0f17;
+  color: #e5e7eb;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Universal box-sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Utilities */
+.container {
+  width: min(1320px, 92%);
+  margin-inline: auto;
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #f7e2a9 0%, #cfa856 50%, #9e7626 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.emerald-gradient-text {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #15803d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ==========================================================================
+   TOP ANNOUNCEMENT / UTILITY BAR
+   ========================================================================== */
+.top-bar {
+  background: linear-gradient(90deg, #0b1510 0%, #0d1e16 50%, #0b1510 100%);
+  border-bottom: 1px solid rgba(207, 168, 86, 0.25);
+  padding: 8px 0;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.top-bar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.top-bar-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.top-bar-location svg {
+  color: var(--ishara-gold);
+}
+
+.top-bar-motto {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--ishara-gold-light);
+}
+
+.top-bar-contact {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.top-bar-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.top-bar-phone:hover {
+  color: var(--ishara-gold-light);
+}
+
+/* ==========================================================================
+   NAVIGATION HEADER
+   ========================================================================== */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(11, 15, 23, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(207, 168, 86, 0.2);
+  transition: all 0.3s ease;
+}
+
+.site-nav-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-icon-svg {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(30, 126, 72, 0.4));
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-brand-name {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.logo-brand-name span {
+  color: var(--ishara-gold);
+}
+
+.logo-tagline {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  color: #e5e7eb;
+  font-weight: 500;
+  font-size: 14.5px;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.2s ease;
+  padding: 4px 0;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--ishara-gold-light);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ishara-gold), var(--ishara-emerald-light));
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+  width: 100%;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #cfa856 0%, #aa7c11 100%);
+  color: #0b0f17;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 11px 22px;
+  border-radius: 9999px;
+  text-decoration: none;
+  border: 1px solid rgba(245, 223, 162, 0.4);
+  box-shadow: 0 4px 14px rgba(207, 168, 86, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(207, 168, 86, 0.45);
+  filter: brightness(1.08);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 22px;
+  border-radius: 9999px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--ishara-gold);
+  transform: translateY(-2px);
+}
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #25d366;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  text-decoration: none;
+  font-size: 13.5px;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.btn-whatsapp:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}
+
+/* Mobile menu toggle */
+.nav-mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  padding: 8px;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+.hero-section {
+  position: relative;
+  padding: 60px 0 80px;
+  background: radial-gradient(circle at 75% 20%, rgba(30, 126, 72, 0.15) 0%, transparent 60%),
+              radial-gradient(circle at 20% 80%, rgba(207, 168, 86, 0.12) 0%, transparent 50%),
+              #0b0f17;
+  overflow: hidden;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: rgba(207, 168, 86, 0.12);
+  border: 1px solid rgba(207, 168, 86, 0.35);
+  color: var(--ishara-gold-light);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(34px, 4.2vw, 56px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px 0;
+  color: #ffffff;
+}
+
+.hero-subtitle {
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-weight: 500;
+  color: var(--ishara-gold-light);
+  margin: 0 0 18px 0;
+  font-style: italic;
+  font-family: var(--font-serif);
+}
+
+.hero-desc {
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: #cbd5e1;
+  max-width: 580px;
+  margin: 0 0 28px 0;
+}
+
+.hero-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 34px;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 30px;
+  font-size: 13px;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.hero-locations-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(20, 28, 40, 0.7);
+  border: 1px solid rgba(207, 168, 86, 0.25);
+  border-radius: 16px;
+  max-width: max-content;
+}
+
+.hero-loc-pin {
+  color: var(--ishara-gold);
+}
+
+.hero-loc-text strong {
+  display: block;
+  font-size: 13.5px;
+  color: #ffffff;
+}
+
+.hero-loc-text span {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   PHONE MOCKUP CONTROLLER (From the Instagram Flyer)
+   ========================================================================== */
+.hero-phone-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.phone-ambient-glow {
+  position: absolute;
+  width: 380px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(207, 168, 86, 0.2) 0%, rgba(30, 126, 72, 0.18) 40%, transparent 70%);
+  filter: blur(40px);
+  z-index: 0;
+  border-radius: 50%;
+}
+
+.smart-phone-frame {
+  position: relative;
+  z-index: 2;
+  width: 310px;
+  height: 610px;
+  background: #000000;
+  border-radius: 46px;
+  padding: 12px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8),
+              0 0 0 3px #282f3b,
+              0 0 0 5px rgba(207, 168, 86, 0.4),
+              inset 0 0 10px rgba(255, 255, 255, 0.15);
+  transform: perspective(1000px) rotateY(-6deg) rotateX(4deg);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.smart-phone-frame:hover {
+  transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(-8px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9),
+              0 0 0 3px #282f3b,
+              0 0 0 6px rgba(207, 168, 86, 0.6);
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #101622 0%, #090c12 100%);
+  border-radius: 36px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px 18px;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.phone-notch {
+  width: 100px;
+  height: 20px;
+  background: #000000;
+  border-radius: 12px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-camera-lens {
+  width: 8px;
+  height: 8px;
+  background: #111e30;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.phone-header {
+  text-align: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(207, 168, 86, 0.2);
+  padding-bottom: 10px;
+}
+
+.phone-logo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.phone-logo-title {
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.1em;
+}
+
+.phone-sub-kicker {
+  font-size: 8px;
+  letter-spacing: 0.24em;
+  color: var(--ishara-gold);
+  text-transform: uppercase;
+}
+
+.phone-room-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* Phone App Grid */
+.phone-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: auto;
+}
+
+.phone-tile {
+  background: rgba(25, 34, 48, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.phone-tile:hover {
+  background: rgba(35, 48, 68, 0.85);
+  border-color: rgba(207, 168, 86, 0.4);
+}
+
+.phone-tile.is-active {
+  background: linear-gradient(135deg, rgba(30, 126, 72, 0.35) 0%, rgba(207, 168, 86, 0.25) 100%);
+  border-color: var(--ishara-gold);
+  box-shadow: 0 4px 14px rgba(207, 168, 86, 0.25);
+}
+
+.phone-tile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ishara-gold-light);
+  transition: all 0.25s ease;
+}
+
+.phone-tile.is-active .phone-tile-icon {
+  background: var(--ishara-gold);
+  color: #0b0f17;
+}
+
+.phone-tile-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.phone-tile-status {
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.phone-tile.is-active .phone-tile-status {
+  color: var(--ishara-emerald-light);
+  font-weight: 600;
+}
+
+/* Master Power Button */
+.phone-master-power {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.phone-power-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #cfa856 0%, #aa7c11 100%);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(207, 168, 86, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b0f17;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.phone-power-btn:hover {
+  transform: scale(1.08);
+  filter: brightness(1.15);
+}
+
+.phone-bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 9px;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   9 AUTOMATION SOLUTIONS SHOWCASE (The Circular Icons in Flyer)
+   ========================================================================== */
+.solutions-section {
+  padding: 90px 0;
+  background: #0f1420;
+  position: relative;
+}
+
+.section-head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 56px;
+}
+
+.section-tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ishara-gold);
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+}
+
+.section-desc {
+  font-size: 16px;
+  color: #94a3b8;
+  line-height: 1.7;
+}
+
+.solutions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.solution-card {
+  background: #141c28;
+  border: 1px solid rgba(207, 168, 86, 0.2);
+  border-radius: 24px;
+  padding: 32px 26px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.solution-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--ishara-gold), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.solution-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(207, 168, 86, 0.5);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(207, 168, 86, 0.15);
+}
+
+.solution-card:hover::before {
+  opacity: 1;
+}
+
+.solution-icon-wrap {
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  background: rgba(207, 168, 86, 0.1);
+  border: 1px solid rgba(207, 168, 86, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  color: var(--ishara-gold-light);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.solution-card:hover .solution-icon-wrap {
+  background: var(--ishara-gold);
+  color: #0b0f17;
+  transform: scale(1.05);
+}
+
+.solution-title {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 10px;
+}
+
+.solution-desc {
+  font-size: 14.5px;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.solution-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.solution-features li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.solution-features li svg {
+  color: var(--ishara-emerald-light);
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   INTERACTIVE SMART HOME PLAYGROUND (Try It Yourself)
+   ========================================================================== */
+.demo-section-wrap {
+  background: #ffffff;
+  color: #161616;
+  padding: 60px 0;
+  position: relative;
+}
+
+.demo-head-banner {
+  background: linear-gradient(135deg, #0b0f17 0%, #162233 100%);
+  border-radius: 24px;
+  padding: 24px 32px;
+  margin-bottom: 36px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  color: #ffffff;
+  border: 1px solid rgba(207, 168, 86, 0.3);
+}
+
+.demo-head-title h3 {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  margin: 0 0 4px;
+}
+
+.demo-head-title p {
+  color: #94a3b8;
+  margin: 0;
+  font-size: 14px;
+}
+
+.demo-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.demo-badge-tag {
+  background: rgba(207, 168, 86, 0.15);
+  border: 1px solid var(--ishara-gold);
+  color: var(--ishara-gold-light);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   3D VIRTUAL TOUR SHOWCASE SECTION
+   ========================================================================== */
+.tour-showcase-section {
+  padding: 90px 0;
+  background: linear-gradient(180deg, #0b0f17 0%, #0e1420 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.tour-card {
+  background: #141c28;
+  border: 1px solid rgba(207, 168, 86, 0.3);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+}
+
+.tour-preview-box {
+  position: relative;
+  background: #000000;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.tour-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.75;
+  transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+.tour-card:hover .tour-preview-img {
+  transform: scale(1.04);
+  opacity: 0.9;
+}
+
+.tour-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(11, 15, 23, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.tour-play-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #cfa856 0%, #aa7c11 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b0f17;
+  box-shadow: 0 8px 30px rgba(207, 168, 86, 0.5);
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.tour-card:hover .tour-play-btn {
+  transform: scale(1.12);
+  filter: brightness(1.15);
+}
+
+.tour-details {
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.tour-details h3 {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 16px;
+}
+
+.tour-details p {
+  color: #94a3b8;
+  font-size: 16px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.tour-highlights-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.tour-hl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+
+.tour-hl-item svg {
+  color: var(--ishara-gold);
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   MATTER & PROTOCOLS COMPATIBILITY
+   ========================================================================== */
+.ecosystem-section {
+  padding: 80px 0;
+  background: #0d121c;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ecosystem-badges-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.eco-badge {
+  background: #141b27;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.eco-badge:hover {
+  transform: translateY(-3px);
+  border-color: var(--ishara-gold);
+}
+
+/* ==========================================================================
+   POWER & ENERGY CALCULATOR SECTION
+   ========================================================================== */
+.energy-section {
+  padding: 80px 0;
+  background: #0b0f17;
+}
+
+.energy-calc-box {
+  background: #141c28;
+  border: 1px solid rgba(207, 168, 86, 0.25);
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.energy-slider-group {
+  margin: 30px 0;
+}
+
+.energy-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 30px;
+  text-align: center;
+}
+
+.energy-metric-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.energy-metric-num {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ishara-gold-light);
+  margin-bottom: 4px;
+}
+
+.energy-metric-label {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   WHY CHOOSE US SECTION
+   ========================================================================== */
+.why-us-section {
+  padding: 90px 0;
+  background: #0f1420;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.why-card {
+  background: #141c28;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 30px 22px;
+  transition: all 0.3s ease;
+}
+
+.why-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--ishara-emerald-light);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.why-num {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ishara-gold);
+  opacity: 0.6;
+  margin-bottom: 12px;
+}
+
+.why-card h4 {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 10px;
+}
+
+.why-card p {
+  font-size: 13.5px;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ==========================================================================
+   CONTACT & QUOTE SECTION (Matching Flyer info)
+   ========================================================================== */
+.contact-section {
+  padding: 90px 0;
+  background: linear-gradient(180deg, #0b0f17 0%, #080c12 100%);
+  position: relative;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.contact-info-card {
+  background: #141c28;
+  border: 1px solid rgba(207, 168, 86, 0.3);
+  border-radius: 28px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(30, 126, 72, 0.2);
+  border: 1px solid var(--ishara-emerald-light);
+  color: var(--ishara-emerald-light);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.contact-headline {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 12px;
+}
+
+.contact-sub {
+  color: #94a3b8;
+  font-size: 15.5px;
+  margin-bottom: 30px;
+}
+
+.contact-item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.contact-item-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(207, 168, 86, 0.12);
+  border: 1px solid rgba(207, 168, 86, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ishara-gold);
+  flex-shrink: 0;
+}
+
+.contact-item-text b {
+  display: block;
+  font-size: 14px;
+  color: #cbd5e1;
+  margin-bottom: 2px;
+}
+
+.contact-item-text a, .contact-item-text span {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.contact-item-text a:hover {
+  color: var(--ishara-gold-light);
+}
+
+.contact-form-card {
+  background: #141c28;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 40px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 13px 16px;
+  background: #0b0f17;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 14.5px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--ishara-gold);
+  box-shadow: 0 0 0 3px rgba(207, 168, 86, 0.25);
+}
+
+.services-chips-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-select-btn {
+  padding: 7px 13px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chip-select-btn.is-selected {
+  background: var(--ishara-gold);
+  color: #0b0f17;
+  border-color: var(--ishara-gold);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.site-footer {
+  background: #080b10;
+  border-top: 1px solid rgba(207, 168, 86, 0.25);
+  padding: 70px 0 30px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 50px;
+}
+
+.footer-brand p {
+  color: #94a3b8;
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin: 16px 0 24px;
+}
+
+.footer-links-col h5 {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 18px;
+}
+
+.footer-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links-list li {
+  margin-bottom: 10px;
+}
+
+.footer-links-list a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.footer-links-list a:hover {
+  color: var(--ishara-gold-light);
+}
+
+.footer-bottom-bar {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   FLOATING ACTION BUTTONS
+   ========================================================================== */
+.floating-actions {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.float-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: transform 0.25s ease, filter 0.25s ease;
+  text-decoration: none;
+}
+
+.float-btn:hover {
+  transform: scale(1.1);
+}
+
+.float-whatsapp {
+  background: #25d366;
+  color: #ffffff;
+}
+
+.float-phone {
+  background: linear-gradient(135deg, #cfa856 0%, #aa7c11 100%);
+  color: #0b0f17;
+}
+
+/* ==========================================================================
+   RESPONSIVE QUERIES
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .smart-phone-frame {
+    transform: none;
+  }
+
+  .solutions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tour-card {
+    grid-template-columns: 1fr;
+  }
+
+  .why-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-links, .nav-actions .btn-secondary {
+    display: none;
+  }
+
+  .nav-mobile-toggle {
+    display: block;
+  }
+
+  .solutions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .why-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .energy-metrics-row {
+    grid-template-columns: 1fr;
+  }
+}

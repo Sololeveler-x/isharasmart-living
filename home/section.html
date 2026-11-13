@@ -1,0 +1,225 @@
+<section class="riva-ph-section" id="riva-house">
+    <div class="riva-ph-inner">
+        <!-- =================================================
+             HEADER
+        ================================================== -->
+        <div class="riva-ph-headrow">
+            <div class="riva-ph-head">
+                <h2 class="riva-ph-title">
+                    A house you can <span>actually switch on.</span>
+                </h2>
+                <p class="riva-ph-lede">
+                    Draw the curtains. Dim the lights. Lock the front door. These are
+                    the same controls you would have on your phone — press one, or
+                    just say it out loud.
+                </p>
+            </div>
+            <div class="riva-ph-rightcol">
+                <div class="riva-ph-badge"
+                     role="img" aria-label="India's first native Matter smart home">
+                    <div class="riva-ph-badge-inner">
+                        <span class="riva-ph-badge-logo" aria-hidden="true">
+                            <img src="https://rivasmart.com/wp-content/uploads/2026/09/matter.webp"
+                                 alt="Matter" width="80" height="80" decoding="async">
+                        </span>
+                        <span class="riva-ph-badge-txt">
+                            <span class="riva-ph-badge-kicker">India's First</span>
+                            <span class="riva-ph-badge-main">Native Matter Smart Home</span>
+                            <span class="riva-ph-badge-sub">Devices that speak one language — and just work together.</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="riva-ph-eyebrow">TRY IT YOURSELF</div>
+            </div>
+        </div>
+        <div class="riva-ph-grid">
+            <!-- ------------ PHOTO + VOICE ------------ -->
+            <div class="riva-ph-stage">
+            <div class="riva-ph-house cam-on" id="riva-ph-house">
+                <span class="riva-ph-tag">Demo</span>
+                <!-- POSTER: the opening view, painted straight from the HTML.
+                     Same file + same srcset/sizes as the script's "day / lights
+                     on" layer and the WPCode preload, so it downloads only once.
+                     KEEP THE srcset ON ONE LINE. -->
+                <img fetchpriority="high" decoding="async" class="riva-ph-poster skip-lazy" data-no-lazy="1" src="https://rivasmart.com/wp-content/uploads/2026/09/Smart-Home-%E2%80%93-Day-Curtains-Open-Lights-On-1024x683.webp" srcset="https://rivasmart.com/wp-content/uploads/2026/09/Smart-Home-%E2%80%93-Day-Curtains-Open-Lights-On-768x512.webp 768w, https://rivasmart.com/wp-content/uploads/2026/09/Smart-Home-%E2%80%93-Day-Curtains-Open-Lights-On-1024x683.webp 1024w, https://rivasmart.com/wp-content/uploads/2026/09/Smart-Home-%E2%80%93-Day-Curtains-Open-Lights-On.webp 1500w" sizes="(max-width:880px) 92vw, 56vw" width="1500" height="1000" alt="A modern two-storey house with smart lights, curtains and a smart lock" fetchpriority="high">
+                <div class="riva-ph-day"></div>
+                <div class="riva-ph-night"></div>
+                <!-- OVERLAY (coordinates are in the photo's own pixel space) -->
+                <svg class="riva-ph-overlay" viewBox="0 0 1536 1024"
+                     preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                        <radialGradient id="rivaWinGlow">
+                            <stop offset="0%"   stop-color="#ffd79a" stop-opacity=".85"/>
+                            <stop offset="60%"  stop-color="#ffc978" stop-opacity=".45"/>
+                            <stop offset="100%" stop-color="#ffc978" stop-opacity="0"/>
+                        </radialGradient>
+                        <linearGradient id="rivaConeG" x1="1" y1="0" x2="0" y2="1">
+                            <stop offset="0%"   stop-color="#eaf4ff" stop-opacity=".65"/>
+                            <stop offset="55%"  stop-color="#eaf4ff" stop-opacity=".18"/>
+                            <stop offset="100%" stop-color="#eaf4ff" stop-opacity="0"/>
+                        </linearGradient>
+                        <filter id="rivaSoft" x="-40%" y="-40%" width="180%" height="180%">
+                            <feGaussianBlur stdDeviation="22"/>
+                        </filter>
+                        <filter id="rivaDimSoft" x="-25%" y="-25%" width="150%" height="150%">
+                            <feGaussianBlur stdDeviation="10"/>
+                        </filter>
+                    </defs>
+                    <g class="win-glow" filter="url(#rivaSoft)">
+                        <ellipse class="gw0" cx="552" cy="670" rx="230" ry="165" fill="url(#rivaWinGlow)"/>
+                        <ellipse class="gw1" cx="497" cy="331" rx="160" ry="105" fill="url(#rivaWinGlow)"/>
+                        <ellipse class="gw2" cx="868" cy="315" rx="100" ry="80"  fill="url(#rivaWinGlow)"/>
+                    </g>
+                    <polygon class="cam-cone" points="1002,548 1030,566 992,1015 742,1015"
+                             fill="url(#rivaConeG)"/>
+                    <g class="sense" fill="none" stroke="#ffd9a6" stroke-linecap="round">
+                        <path d="M905 826a58 58 0 0 1 84 0"  stroke-width="5"/>
+                        <path d="M876 862a92 92 0 0 1 142 0" stroke-width="5"/>
+                        <path d="M848 898a126 126 0 0 1 198 0" stroke-width="5"/>
+                    </g>
+                    <g fill="none" stroke="#fff1d8" stroke-linecap="round"
+                       style="filter:drop-shadow(0 0 6px rgba(0,0,0,.35))">
+                        <path class="wave" d="M340 668a40 40 0 0 0 0-56"   stroke-width="7"/>
+                        <path class="wave" d="M316 692a72 72 0 0 0 0-104"  stroke-width="7"/>
+                        <path class="wave" d="M292 716a104 104 0 0 0 0-152" stroke-width="7"/>
+                    </g>
+                    <g transform="translate(916,690)">
+                        <circle class="lock-bg" cx="0" cy="0" r="30"/>
+                        <g transform="translate(-13,-14)">
+                            <path class="lock-shackle" d="M7 12V8a6 6 0 0 1 12 0v4"
+                                  fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>
+                            <rect x="3" y="12" width="20" height="16" rx="4" fill="#fff"/>
+                        </g>
+                    </g>
+                </svg>
+                <div class="riva-ph-status" role="status" aria-live="polite">
+                    <i></i><span id="riva-ph-status-text">Everything is set</span>
+                </div>
+            </div>
+            <!-- ------------ VOICE ------------ -->
+            <div class="riva-ph-voice">
+                <button class="riva-ph-mic" type="button" id="riva-ph-mic"
+                        aria-label="Speak a command">
+                    <span class="mic-ring"></span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="9.3" y="2.6" width="5.4" height="10.2" rx="2.7"/>
+                        <path d="M6.4 11.1a5.6 5.6 0 0 0 11.2 0"/>
+                        <path d="M12 16.7v3.1"/>
+                        <path d="M9.4 19.8h5.2"/>
+                        <path d="M3.3 9.6a3.6 3.6 0 0 0 0 4.8"/>
+                        <path d="M20.7 9.6a3.6 3.6 0 0 1 0 4.8"/>
+                    </svg>
+                </button>
+                <div class="riva-ph-voice-body">
+                    <div class="riva-ph-voice-line" id="riva-ph-voice-line">
+                        Tap the mic and say <em>“close the curtains”</em>
+                    </div>
+                    <div class="riva-ph-chips">
+                        <button type="button" data-say="close the curtains">“close the curtains”</button>
+                        <button type="button" data-say="dim the lights to 20 percent">“dim the lights to 20%”</button>
+                        <button type="button" data-say="lock the front door">“lock the front door”</button>
+                        <button type="button" data-say="movie night">“movie night”</button>
+                    </div>
+                </div>
+                <span class="riva-ph-bars" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i>
+                </span>
+            </div>
+            </div>
+            <!-- ------------ PANEL ------------ -->
+            <div class="riva-ph-panel">
+                <div class="riva-ph-panel-top">
+                    <strong>Living room</strong>
+                    <div class="riva-ph-seg" role="group" aria-label="Time of day">
+                        <button type="button" data-time="day" class="is-on">Day</button>
+                        <button type="button" data-time="night">Night</button>
+                    </div>
+                </div>
+                <div class="riva-ph-scenes" aria-label="Scenes">
+                    <button type="button" data-scene="morning">Good morning</button>
+                    <button type="button" data-scene="movie">Movie night</button>
+                    <button type="button" data-scene="away">Away</button>
+                </div>
+                <div class="riva-ph-rows">
+                    <div class="riva-ph-row" data-row="lights" style="--row-accent:#d8b877">
+                        <span class="riva-ph-ico">
+                            <svg viewBox="0 0 24 24"><path d="M9 17c0-2.5-2.5-3.6-2.5-6.6a5.5 5.5 0 0 1 11 0c0 3-2.5 4.1-2.5 6.6Z"/><path d="M9.8 20h4.4"/></svg>
+                        </span>
+                        <span class="riva-ph-meta"><b>Lights</b><span data-state="lights">On · 75%</span></span>
+                        <div class="riva-ph-groups" data-groups="lights" aria-label="Which lights">
+                            <button type="button" data-group="all" class="is-on">All</button>
+                            <button type="button" data-group="1">Bedroom</button>
+                            <button type="button" data-group="2">Kitchen</button>
+                            <button type="button" data-group="0">Hallroom</button>
+                            <button type="button" data-group="outside">Outside</button>
+                        </div>
+                        <button class="riva-ph-switch" type="button" role="switch"
+                                aria-checked="true" data-toggle="lights" aria-label="Lights"></button>
+                    </div>
+                    <div class="riva-ph-slider" data-slider="lights" style="--row-accent:#d8b877">
+                        <input type="range" min="0" max="100" value="75" aria-label="Light brightness">
+                    </div>
+                    <div class="riva-ph-slider riva-ph-slider-temp" data-slider="lighttemp">
+                        <span class="riva-ph-temp-cap riva-ph-temp-warm">Warm</span>
+                        <input type="range" min="0" max="100" value="0" aria-label="Light colour temperature, warm to cool white">
+                        <span class="riva-ph-temp-cap riva-ph-temp-cool">Cool</span>
+                    </div>
+                    <div class="riva-ph-row" data-row="curtains" style="--row-accent:#a9b39c">
+                        <span class="riva-ph-ico">
+                            <svg viewBox="0 0 24 24"><path d="M3 4h18"/><path d="M6 4c0 6 2.5 10 1 16"/><path d="M10 4c0 6 2 10 1 16"/><path d="M18 4c0 6-2.5 10-1 16"/><path d="M14 4c0 6-2 10-1 16"/></svg>
+                        </span>
+                        <span class="riva-ph-meta"><b>Curtains</b><span data-state="curtains">Open</span></span>
+                        <div class="riva-ph-groups" data-groups="curtains" aria-label="Which curtains">
+                            <button type="button" data-group="all" class="is-on">All</button>
+                            <button type="button" data-group="1">Bedroom</button>
+                            <button type="button" data-group="2">Kitchen</button>
+                            <button type="button" data-group="0">Hallroom</button>
+                        </div>
+                        <button class="riva-ph-switch" type="button" role="switch"
+                                aria-checked="true" data-toggle="curtains" aria-label="Curtains"></button>
+                    </div>
+                    <div class="riva-ph-slider" data-slider="curtains" style="--row-accent:#a9b39c">
+                        <input type="range" min="0" max="100" value="100" aria-label="How far the curtains are open">
+                    </div>
+                    <div class="riva-ph-row" data-row="lock" style="--row-accent:#9fa9b3">
+                        <span class="riva-ph-ico">
+                            <svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2"/><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7"/></svg>
+                        </span>
+                        <span class="riva-ph-meta"><b>Front door</b><span data-state="lock">Locked</span></span>
+                        <button class="riva-ph-switch" type="button" role="switch"
+                                aria-checked="true" data-toggle="lock" aria-label="Front door lock"></button>
+                    </div>
+                    <div class="riva-ph-row" data-row="camera" style="--row-accent:#8fa4b8">
+                        <span class="riva-ph-ico">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.4"/><path d="M5.5 19c.9-3.6 3.4-5.4 6.5-5.4s5.6 1.8 6.5 5.4"/></svg>
+                        </span>
+                        <span class="riva-ph-meta"><b>Camera</b><span data-state="camera">Recording</span></span>
+                        <button class="riva-ph-switch" type="button" role="switch"
+                                aria-checked="true" data-toggle="camera" aria-label="Camera"></button>
+                    </div>
+                    <div class="riva-ph-row is-off" data-row="speaker" style="--row-accent:#b9a595">
+                        <span class="riva-ph-ico">
+                            <svg viewBox="0 0 24 24"><path d="M5 9.5h3.5L13 6v12l-4.5-3.5H5z"/><path d="M16.5 9.2a4 4 0 0 1 0 5.6"/><path d="M19 7a7.4 7.4 0 0 1 0 10"/></svg>
+                        </span>
+                        <span class="riva-ph-meta"><b>Speaker</b><span data-state="speaker">Off</span></span>
+                        <button class="riva-ph-switch" type="button" role="switch"
+                                aria-checked="false" data-toggle="speaker" aria-label="Speaker"></button>
+                    </div>
+                    <div class="riva-ph-row is-off" data-row="sensor" style="--row-accent:#c9a184">
+                        <span class="riva-ph-ico">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.8" fill="#fff" stroke="none"/><path d="M8.6 15.4a4.8 4.8 0 0 1 0-6.8"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M5.8 18.2a8.8 8.8 0 0 1 0-12.4"/><path d="M18.2 5.8a8.8 8.8 0 0 1 0 12.4"/></svg>
+                        </span>
+                        <span class="riva-ph-meta"><b>Motion sensor</b><span data-state="sensor">Disarmed</span></span>
+                        <button class="riva-ph-switch" type="button" role="switch"
+                                aria-checked="false" data-toggle="sensor" aria-label="Motion sensor"></button>
+                    </div>
+                </div>
+                <p class="riva-ph-foot">
+                    A demo, not a live home — but this is how the real thing behaves.
+                    Voice uses your browser's own speech recognition; nothing reaches
+                    our servers.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
